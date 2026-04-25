@@ -1308,92 +1308,98 @@ function confirmBooking() {
   }
 }
 
-// ====== 问诊界面 ======
+// ====== 患者问诊界面 ======
 function enterConsultation() {
-  // 根据模式切换话术
-  var greeting = document.getElementById('consultGreetingText');
-  var replies = document.getElementById('consultQuickReplies');
-
-  if (inFamilyMode) {
-    greeting.innerHTML = '您好，我是李建华医生。我看到这次是家属代为问诊，请问您是患者张建国的什么人？<br><br>我已经收到张叔叔的用药记录和库存情况，氨氯地平快用完了。请问他最近身体状况怎么样？';
-    replies.innerHTML =
-      '<button class="cqr-btn" onclick="consultQuickReply(this)">我是他儿子，他说最近血压还行，大概 135/85</button>' +
-      '<button class="cqr-btn" onclick="consultQuickReply(this)">我是他儿子，他最近老说头晕，我有点担心</button>' +
-      '<button class="cqr-btn" onclick="consultQuickReply(this)">我是他儿子，他没什么不舒服，帮他续个药</button>';
-  } else {
-    greeting.innerHTML = '您好张叔叔，我已经看到您的用药记录了。整体服药情况不错。<br><br>我看到氨氯地平快用完了，我先了解一下近期情况，请问最近血压测量怎么样？';
-    replies.innerHTML =
-      '<button class="cqr-btn" onclick="consultQuickReply(this)">最近血压基本在 135/85 左右</button>' +
-      '<button class="cqr-btn" onclick="consultQuickReply(this)">偶尔头晕，不确定是不是血压高</button>' +
-      '<button class="cqr-btn" onclick="consultQuickReply(this)">没什么不舒服，想继续开药</button>';
-  }
-
   document.getElementById('consultOverlay').classList.add('show');
 }
-
 function exitConsultation() {
   document.getElementById('consultOverlay').classList.remove('show');
 }
-
 function endConsultation() {
   document.getElementById('consultOverlay').classList.remove('show');
   document.getElementById('consultSummaryModal').classList.add('show');
 }
 
-// 问诊快捷回复 —— 患者本人
 const consultDoctorReplies = {
   '最近血压基本在 135/85 左右': '135/85 稍微偏高一点，但还在可接受范围内。目前氨氯地平 5mg 的剂量先维持不变。\n\n建议您每天早上起床后、晚上睡前各测一次血压，连续记录一周，下次复诊时带过来，我好判断是否需要调整剂量。\n\n这次我给您继续开氨氯地平和阿司匹林的处方，各 30 天的量。',
   '偶尔头晕，不确定是不是血压高': '头晕要关注一下。可能跟血压波动有关，也可能是其他原因。\n\n建议近几天密切监测血压，特别是头晕发作时。如果收缩压经常超过 140，可能需要调整用药。\n\n这次先继续当前方案，如果头晕加重或频繁发作，随时联系我。处方我先开 30 天的量。',
   '没什么不舒服，想继续开药': '那挺好的，说明目前方案控制得不错。\n\n我给您续开氨氯地平 5mg 和阿司匹林 100mg，各 30 天的量。继续保持低盐饮食和适量运动。\n\n下次复诊大概 4 周后，届时带一下近期的血压记录。'
 };
 
-// 问诊快捷回复 —— 家属代问诊
-const consultFamilyReplies = {
+function consultQuickReply(btn) {
+  var text = btn.textContent;
+  addConsultMsg(text, 'patient', 'consultChatArea', 'consultChatScroll', '张');
+  document.getElementById('consultQuickReplies').style.display = 'none';
+  setTimeout(function() {
+    var reply = consultDoctorReplies[text] || '好的，我了解了。我给您继续开处方，请注意按时服药。';
+    addConsultMsg(reply, 'doctor', 'consultChatArea', 'consultChatScroll', '张');
+  }, 1200);
+}
+
+function sendConsultMsg() {
+  var input = document.getElementById('consultInput');
+  var text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addConsultMsg(text, 'patient', 'consultChatArea', 'consultChatScroll', '张');
+  document.getElementById('consultQuickReplies').style.display = 'none';
+  setTimeout(function() {
+    addConsultMsg('好的，我了解了。根据您的情况，我建议继续当前用药方案。处方我这边开好，您确认后就可以购药了。', 'doctor', 'consultChatArea', 'consultChatScroll', '张');
+  }, 1200);
+}
+
+// ====== 家属代问诊界面 ======
+function enterFmConsultation() {
+  document.getElementById('fmConsultOverlay').classList.add('show');
+}
+function exitFmConsultation() {
+  document.getElementById('fmConsultOverlay').classList.remove('show');
+}
+function endFmConsultation() {
+  document.getElementById('fmConsultOverlay').classList.remove('show');
+  document.getElementById('consultSummaryModal').classList.add('show');
+}
+
+const fmDoctorReplies = {
   '我是他儿子，他说最近血压还行，大概 135/85': '好的，谢谢您。135/85 稍微偏高一点点，但还在可控范围。\n\n麻烦您回去帮张叔叔量几天血压，早晚各一次，记录下来。如果收缩压经常超过 140 就需要调药了。\n\n这次我先给他续开氨氯地平和阿司匹林，各 30 天的量。药到了提醒他按时吃。',
   '我是他儿子，他最近老说头晕，我有点担心': '头晕的话需要关注。可能跟血压波动有关，也可能是低血糖或者颈椎的问题。\n\n建议这样：头晕的时候帮他量一下血压，记录当时的数值。如果收缩压超过 150 或者低于 100，要及时来复诊。\n\n这次处方我先开 30 天的量，如果头晕频繁或加重，带他来面诊一次比较放心。',
   '我是他儿子，他没什么不舒服，帮他续个药': '那就好，说明目前方案效果不错。\n\n我给张叔叔续开氨氯地平 5mg 和阿司匹林 100mg，各 30 天。提醒他继续保持低盐饮食，适量活动。\n\n另外麻烦您帮他记录一下每天的血压，下次复诊带过来，大概 4 周后。'
 };
 
-function consultQuickReply(btn) {
-  const text = btn.textContent;
-  addConsultMsg(text, 'patient');
-  document.getElementById('consultQuickReplies').style.display = 'none';
-  setTimeout(() => {
-    var allReplies = Object.assign({}, consultDoctorReplies, consultFamilyReplies);
-    var fallback = inFamilyMode
-      ? '好的，我了解了。我给张叔叔继续开处方，药到了麻烦您提醒他按时吃。'
-      : '好的，我了解了。我给您继续开处方，请注意按时服药。';
-    var reply = allReplies[text] || fallback;
-    addConsultMsg(reply, 'doctor');
+function fmConsultQuickReply(btn) {
+  var text = btn.textContent;
+  addConsultMsg(text, 'patient', 'fmConsultChatArea', 'fmConsultChatScroll', '小');
+  document.getElementById('fmConsultQuickReplies').style.display = 'none';
+  setTimeout(function() {
+    var reply = fmDoctorReplies[text] || '好的，我了解了。我给张叔叔继续开处方，药到了麻烦您提醒他按时吃。';
+    addConsultMsg(reply, 'doctor', 'fmConsultChatArea', 'fmConsultChatScroll', '小');
   }, 1200);
 }
 
-function sendConsultMsg() {
-  const input = document.getElementById('consultInput');
-  const text = input.value.trim();
+function fmSendConsultMsg() {
+  var input = document.getElementById('fmConsultInput');
+  var text = input.value.trim();
   if (!text) return;
   input.value = '';
-  addConsultMsg(text, 'patient');
-  document.getElementById('consultQuickReplies').style.display = 'none';
-  setTimeout(() => {
-    var reply = inFamilyMode
-      ? '好的，我了解了。我给张叔叔继续当前方案，处方开好后您确认就可以购药了。药到了提醒他按时吃。'
-      : '好的，我了解了。根据您的情况，我建议继续当前用药方案。处方我这边开好，您确认后就可以购药了。';
-    addConsultMsg(reply, 'doctor');
+  addConsultMsg(text, 'patient', 'fmConsultChatArea', 'fmConsultChatScroll', '小');
+  document.getElementById('fmConsultQuickReplies').style.display = 'none';
+  setTimeout(function() {
+    addConsultMsg('好的，我了解了。我给张叔叔继续当前方案，处方开好后您确认就可以购药了。药到了提醒他按时吃。', 'doctor', 'fmConsultChatArea', 'fmConsultChatScroll', '小');
   }, 1200);
 }
 
-function addConsultMsg(text, role) {
-  const area = document.getElementById('consultChatArea');
-  const div = document.createElement('div');
+// ====== 通用聊天消息 ======
+function addConsultMsg(text, role, areaId, scrollId, userAvatar) {
+  var area = document.getElementById(areaId);
+  var div = document.createElement('div');
   div.className = 'consult-msg ' + role;
-  const avatar = role === 'doctor' ? '李' : (inFamilyMode ? '小' : '张');
+  var avatar = role === 'doctor' ? '李' : userAvatar;
   div.innerHTML =
     '<div class="consult-msg-avatar">' + avatar + '</div>' +
     '<div class="consult-msg-bubble">' + escapeHtml(text).replace(/\n/g, '<br>') + '</div>';
   area.appendChild(div);
-  const scroll = document.getElementById('consultChatScroll');
-  setTimeout(() => scroll.scrollTop = scroll.scrollHeight, 50);
+  var scroll = document.getElementById(scrollId);
+  setTimeout(function() { scroll.scrollTop = scroll.scrollHeight; }, 50);
 }
 
 // 问诊小结 → 同步并购药
@@ -1506,6 +1512,65 @@ function submitOrder() {
   document.getElementById('orderModal').classList.remove('show');
   var msg = currentDelivery === 'express' ? '订单已提交，预计30分钟送达' : '订单已提交，预计明日送达';
   showToast(msg);
+
+  // 模拟药品到货后更新库存（两个页面都更新）
+  setTimeout(function() {
+    updateStockAfterOrder();
+    showToast('药品已到货，药量已自动更新');
+  }, 2000);
+}
+
+function updateStockAfterOrder() {
+  // 更新所有页面中氨氯地平的库存：12+30=42片
+  var allBoxCards = document.querySelectorAll('.box-card');
+  allBoxCards.forEach(function(card) {
+    var name = card.querySelector('.box-drug-name');
+    if (name && name.textContent === '氨氯地平片') {
+      card.classList.remove('urgent');
+      card.classList.add('normal');
+      var tag = card.querySelector('.box-tag');
+      if (tag) { tag.className = 'box-tag tag-ok'; tag.textContent = '药量充足'; }
+      var fill = card.querySelector('.meter-fill');
+      if (fill) { fill.className = 'meter-fill ok-fill'; fill.style.width = '70%'; }
+      var mt = card.querySelector('.meter-text');
+      if (mt) mt.textContent = '剩余 42 片';
+      var infos = card.querySelectorAll('.box-info');
+      if (infos[1]) infos[1].innerHTML = '<span class="box-info-label">可服天数</span><span>42天</span>';
+      if (infos[2]) infos[2].innerHTML = '<span class="box-info-label">预计用完</span><span>6月6日</span>';
+      // 隐藏续方按钮
+      var btnRow = card.querySelector('.box-btn-row');
+      if (btnRow) btnRow.style.display = 'none';
+    }
+    // 阿司匹林：45+30=75片
+    if (name && name.textContent === '阿司匹林肠溶片') {
+      var fill = card.querySelector('.meter-fill');
+      if (fill) fill.style.width = '100%';
+      var mt = card.querySelector('.meter-text');
+      if (mt) mt.textContent = '剩余 75 片';
+      var infos = card.querySelectorAll('.box-info');
+      if (infos[1]) infos[1].innerHTML = '<span class="box-info-label">可服天数</span><span>75天</span>';
+      if (infos[2]) infos[2].innerHTML = '<span class="box-info-label">预计用完</span><span>7月9日</span>';
+    }
+  });
+
+  // 更新库存总览：紧张数归0
+  document.querySelectorAll('.bo-item').forEach(function(item) {
+    var label = item.querySelector('.bo-label');
+    var num = item.querySelector('.bo-num');
+    if (label && (label.textContent === '库存紧张' || label.textContent === '快吃完了') && num) {
+      num.textContent = '0';
+      num.classList.remove('warn-text');
+    }
+  });
+
+  // 更新首页风险卡片
+  var alerts = document.querySelectorAll('.alert-card.risk-orange');
+  alerts.forEach(function(a) {
+    var title = a.querySelector('.alert-title');
+    if (title && title.textContent.includes('氨氯地平')) {
+      a.style.display = 'none';
+    }
+  });
 }
 
 // ====== 提前提醒时间选择 ======

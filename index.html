@@ -1260,7 +1260,7 @@
               <span>&#10003; 已附带爸爸的库存情况</span>
               <span>&#128100; 已标注家属代问诊</span>
             </div>
-            <button class="pv-enter-btn" onclick="enterConsultation()">进入问诊</button>
+            <button class="pv-enter-btn" onclick="enterFmConsultation()">进入问诊</button>
           </div>
         </div>
 
@@ -1904,6 +1904,7 @@
     </div>
 
     <!-- ===== 问诊界面（全屏覆盖） ===== -->
+    <!-- ===== 患者问诊界面 ===== -->
     <div class="consult-overlay" id="consultOverlay">
       <div class="consult-page">
         <header class="consult-header">
@@ -1914,10 +1915,8 @@
           </div>
           <button class="consult-end-btn" onclick="endConsultation()">结束问诊</button>
         </header>
-
         <div class="consult-chat-scroll" id="consultChatScroll">
           <div class="consult-chat-area" id="consultChatArea">
-            <!-- 系统自动发送的患者资料 -->
             <div class="consult-system-msg">
               <div class="csm-title">系统已自动发送以下资料给医生</div>
               <div class="csm-cards">
@@ -1935,18 +1934,14 @@
                 </div>
               </div>
             </div>
-
-            <!-- 医生自动回复 -->
-            <div class="consult-msg doctor" id="consultDoctorGreeting">
+            <div class="consult-msg doctor">
               <div class="consult-msg-avatar">李</div>
-              <div class="consult-msg-bubble" id="consultGreetingText">
+              <div class="consult-msg-bubble">
                 您好张叔叔，我已经看到您的用药记录了。整体服药情况不错。<br><br>我看到氨氯地平快用完了，我先了解一下近期情况，请问最近血压测量怎么样？
               </div>
             </div>
           </div>
         </div>
-
-        <!-- 快捷回复 + 输入框 -->
         <div class="consult-quick-replies" id="consultQuickReplies">
           <button class="cqr-btn" onclick="consultQuickReply(this)">最近血压基本在 135/85 左右</button>
           <button class="cqr-btn" onclick="consultQuickReply(this)">偶尔头晕，不确定是不是血压高</button>
@@ -1955,6 +1950,59 @@
         <div class="consult-input-bar">
           <input type="text" id="consultInput" placeholder="输入消息..." onkeydown="if(event.key==='Enter')sendConsultMsg()">
           <button class="consult-send" onclick="sendConsultMsg()">&#10148;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 家属代问诊界面 ===== -->
+    <div class="consult-overlay" id="fmConsultOverlay">
+      <div class="consult-page">
+        <header class="consult-header">
+          <button class="consult-back" onclick="exitFmConsultation()">&#8249; 返回</button>
+          <div class="consult-header-info">
+            <span class="consult-doctor-name">李建华 · 心内科</span>
+            <span class="consult-type">家属代问诊</span>
+          </div>
+          <button class="consult-end-btn" onclick="endFmConsultation()">结束问诊</button>
+        </header>
+        <div class="consult-chat-scroll" id="fmConsultChatScroll">
+          <div class="consult-chat-area" id="fmConsultChatArea">
+            <div class="consult-system-msg">
+              <div class="csm-title">系统已自动发送爸爸的资料给医生</div>
+              <div class="csm-cards">
+                <div class="csm-card">
+                  <div class="csm-card-title">近 7 日服药记录</div>
+                  <div class="csm-card-body">按时服药 33/35 次，依从率 92%<br>漏服：4/24 晚间二甲双胍 1 次</div>
+                </div>
+                <div class="csm-card">
+                  <div class="csm-card-title">当前用药方案</div>
+                  <div class="csm-card-body">氨氯地平 5mg 1次/日<br>阿司匹林 100mg 1次/日<br>二甲双胍 0.5g 3次/日<br>阿托伐他汀 20mg 1次/日</div>
+                </div>
+                <div class="csm-card">
+                  <div class="csm-card-title">家里剩余药量</div>
+                  <div class="csm-card-body">氨氯地平剩 12 片（6天）<span style="color:var(--danger)"> 紧张</span><br>其余 3 种药量充足</div>
+                </div>
+              </div>
+            </div>
+            <div class="consult-system-msg" style="background:#e3f2fd;margin-top:10px">
+              <div class="csm-title" style="color:#1565c0">&#128100; 家属代问诊 · 儿子张小明代为沟通</div>
+            </div>
+            <div class="consult-msg doctor">
+              <div class="consult-msg-avatar">李</div>
+              <div class="consult-msg-bubble">
+                您好，我是李建华医生。我看到这次是家属代为问诊，请问您是患者张建国的什么人？<br><br>我已经收到张叔叔的用药记录和库存情况，氨氯地平快用完了。请问他最近身体状况怎么样？
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="consult-quick-replies" id="fmConsultQuickReplies">
+          <button class="cqr-btn" onclick="fmConsultQuickReply(this)">我是他儿子，他说最近血压还行，大概 135/85</button>
+          <button class="cqr-btn" onclick="fmConsultQuickReply(this)">我是他儿子，他最近老说头晕，我有点担心</button>
+          <button class="cqr-btn" onclick="fmConsultQuickReply(this)">我是他儿子，他没什么不舒服，帮他续个药</button>
+        </div>
+        <div class="consult-input-bar">
+          <input type="text" id="fmConsultInput" placeholder="输入消息..." onkeydown="if(event.key==='Enter')fmSendConsultMsg()">
+          <button class="consult-send" onclick="fmSendConsultMsg()">&#10148;</button>
         </div>
       </div>
     </div>
