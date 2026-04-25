@@ -1215,22 +1215,28 @@
         <h2>帮爸爸问诊</h2>
       </header>
       <main class="content">
+        <!-- 代问诊说明 -->
+        <div class="fm-visit-tip">
+          <div class="fm-visit-tip-icon">&#128100;</div>
+          <div class="fm-visit-tip-text">您正在以<strong>家属身份</strong>代爸爸问诊，医生将知晓是家属代为沟通</div>
+        </div>
+
         <!-- 快捷入口 -->
         <div class="visit-quick-entries">
           <div class="vq-card" onclick="openBooking('text')">
             <div class="vq-icon">&#128172;</div>
-            <div class="vq-name">图文问诊</div>
-            <div class="vq-desc">随时发消息</div>
+            <div class="vq-name">代爸爸图文问诊</div>
+            <div class="vq-desc">用文字和医生沟通爸爸的病情</div>
           </div>
           <div class="vq-card" onclick="openBooking('phone')">
             <div class="vq-icon">&#128222;</div>
-            <div class="vq-name">电话问诊</div>
-            <div class="vq-desc">医生回拨</div>
+            <div class="vq-name">代爸爸电话问诊</div>
+            <div class="vq-desc">医生回拨给您，代爸爸说明情况</div>
           </div>
           <div class="vq-card" onclick="showToast('已帮爸爸发起续方申请，等待医师审核')">
             <div class="vq-icon">&#128203;</div>
-            <div class="vq-name">一键续方</div>
-            <div class="vq-desc">无需问诊</div>
+            <div class="vq-name">帮爸爸续方</div>
+            <div class="vq-desc">复用上次处方，无需问诊</div>
           </div>
         </div>
 
@@ -1238,20 +1244,21 @@
         <div class="pending-visit-card" id="fmPendingVisit" style="display:none">
           <div class="pv-status-bar">
             <span class="pv-status-dot"></span>
-            <span class="pv-status-text">待问诊</span>
+            <span class="pv-status-text">待问诊（代爸爸）</span>
           </div>
           <div class="pv-body">
             <div class="pv-doctor-row">
               <div class="pv-avatar" id="fmPvAvatar">李</div>
               <div class="pv-info">
                 <div class="pv-doctor-name" id="fmPvDoctorName">李建华 · 心内科</div>
-                <div class="pv-time" id="fmPvTime">视频问诊 · 明天 10:00</div>
+                <div class="pv-time" id="fmPvTime">图文问诊 · 明天 10:00</div>
               </div>
             </div>
             <div class="pv-attach">
               <span>&#10003; 已附带爸爸的服药记录</span>
               <span>&#10003; 已附带爸爸的用药方案</span>
               <span>&#10003; 已附带爸爸的库存情况</span>
+              <span>&#128100; 已标注家属代问诊</span>
             </div>
             <button class="pv-enter-btn" onclick="enterConsultation()">进入问诊</button>
           </div>
@@ -1297,7 +1304,7 @@
             <div class="rx-card">
               <div class="rx-top-row">
                 <div class="rx-date">2026.03.28</div>
-                <span class="rx-type type-video">视频问诊</span>
+                <span class="rx-type type-text">图文问诊</span>
               </div>
               <div class="rx-doctor">李建华 · 心内科</div>
               <div class="rx-summary">血压控制尚可，继续当前方案，注意低盐饮食</div>
@@ -1930,9 +1937,9 @@
             </div>
 
             <!-- 医生自动回复 -->
-            <div class="consult-msg doctor">
+            <div class="consult-msg doctor" id="consultDoctorGreeting">
               <div class="consult-msg-avatar">李</div>
-              <div class="consult-msg-bubble">
+              <div class="consult-msg-bubble" id="consultGreetingText">
                 您好张叔叔，我已经看到您的用药记录了。整体服药情况不错。<br><br>我看到氨氯地平快用完了，我先了解一下近期情况，请问最近血压测量怎么样？
               </div>
             </div>
@@ -1940,7 +1947,7 @@
         </div>
 
         <!-- 快捷回复 + 输入框 -->
-        <div class="consult-quick-replies">
+        <div class="consult-quick-replies" id="consultQuickReplies">
           <button class="cqr-btn" onclick="consultQuickReply(this)">最近血压基本在 135/85 左右</button>
           <button class="cqr-btn" onclick="consultQuickReply(this)">偶尔头晕，不确定是不是血压高</button>
           <button class="cqr-btn" onclick="consultQuickReply(this)">没什么不舒服，想继续开药</button>
