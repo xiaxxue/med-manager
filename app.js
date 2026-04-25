@@ -1720,11 +1720,13 @@ function selectRole(role) {
 
   if (role === 'patient') {
     // 显示患者导航和首页
+    inFamilyMode = false;
     document.getElementById('tab-bar-main').style.display = '';
     document.getElementById('familyTabBar').style.display = 'none';
     switchTab('tab-home');
   } else {
     // 显示家属导航和监护首页
+    inFamilyMode = true;
     document.getElementById('tab-bar-main').style.display = 'none';
     document.getElementById('familyTabBar').style.display = '';
     // 重置家属tab
@@ -1736,6 +1738,7 @@ function selectRole(role) {
 }
 
 function backToRoleSelect() {
+  inFamilyMode = false;
   // 隐藏所有页面和导航
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-bar-main').style.display = 'none';
