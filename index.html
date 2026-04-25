@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>慢病用药小管家</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- ===== 首页（合并用药计划） ===== -->
+    <div class="page active" id="page-home">
+      <header class="top-bar" id="topBar">
+        <div class="top-bar-full">
+          <div class="greeting-row">
+            <div class="greeting">
+              <div class="avatar" onclick="switchTab('tab-profile')">张</div>
+              <div>
+                <div class="greeting-name">下午好，张叔叔</div>
+                <div class="greeting-sub">高血压 · 2型糖尿病 · 用药第 86 天</div>
+              </div>
+            </div>
+            <div class="score-badge" id="scoreBtn">
+              <span class="score-num">92</span>
+              <span class="score-label">吃药评分 · 优秀</span>
+            </div>
+          </div>
+          <div class="top-bar-ai">
+            <div class="ai-suggest-card" onclick="switchTab('tab-ai')">
+              <div class="ai-avatar">AI</div>
+              <div class="ai-text">
+                <p>&#127793; 本周服药率 <strong>92%</strong>，比上周提升 3%，继续保持！</p>
+                <p>&#127777; 今日气温骤降至 12°C，高血压患者注意保暖，建议推迟晨练</p>
+                <p>&#128197; 距下次复诊还有 <strong>15 天</strong>，建议开始记录每日血压数据</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="top-bar-mini" id="topBarMini" onclick="expandTopBar()">
+          <span class="mini-text">张叔叔 · 吃药评分 92 优秀</span>
+          <span class="mini-arrow">&#9660;</span>
+        </div>
+      </header>
+
+      <main class="content">
+
+        <!-- 今日概览 -->
+        <section class="today-summary">
+          <div class="summary-cards">
+            <div class="s-card">
+              <div class="s-card-num"><span class="done">3</span>/<span>5</span></div>
+              <div class="s-card-label">今日已服</div>
+            </div>
+            <div class="s-card accent">
+              <div class="s-card-num">14:30</div>
+              <div class="s-card-label">下次提醒</div>
+            </div>
+            <div class="s-card warn">
+              <div class="s-card-num">6天</div>
+              <div class="s-card-label">药快没了</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 风险提醒 -->
+        <section class="risk-alerts">
+          <div class="alert-card risk-orange">
+            <div class="alert-icon">&#9888;</div>
+            <div class="alert-body">
+              <div class="alert-title">氨氯地平快吃完了</div>
+              <div class="alert-desc">剩余 12 片，预计 6 天后用完，建议本周续方</div>
+            </div>
+            <button class="alert-action" onclick="switchTab('tab-renew')">去续方</button>
+          </div>
+          <div class="alert-card risk-red">
+            <div class="alert-icon">&#9673;</div>
+            <div class="alert-body">
+              <div class="alert-title">昨日晚间漏服 1 次</div>
+              <div class="alert-desc">二甲双胍 0.5g 未确认服用</div>
+            </div>
+            <button class="alert-action" onclick="switchTab('tab-ai')">问问AI</button>
+          </div>
+        </section>
+
+        <!-- 紧急求助 -->
+        <button class="emergency-btn" onclick="emergencyCall()">
+          <span class="emergency-icon">&#128680;</span> 紧急求助（拨打家属或120）
+        </button>
+
+        <!-- 用药���划（合并自用药页） -->
+        <section class="section-block">
+          <div class="section-header">
+            <h3>今日用药</h3>
+          </div>
+
+          <!-- 日期选择（JS动态生成） -->
+          <div class="date-month-label" id="dateMonthLabel">4月</div>
+          <div class="date-picker" id="datePicker"></div>
+
+          <!-- 服药进度 -->
+          <div class="med-progress">
+            <div class="prog-bar">
+              <div class="prog-fill" style="width:60%"></div>
+            </div>
+            <div class="prog-text">已完成 3/5 次服药</div>
+          </div>
+
+          <!-- 详细时间轴 -->
+          <div class="med-timeline">
+            <div class="mt-section" data-time="7">
+              <div class="mt-period">
+                <span class="mt-period-icon">&#9728;</span> 晨起 · 07:00
+              </div>
+              <div class="med-card">
+                <div class="mc-left">
+                  <div class="mc-name">氨氯地平片</div>
+                  <div class="mc-detail">5mg × 1片 · 空腹服用</div>
+                  <div class="mc-disease">高血压</div>
+                </div>
+                <div class="mc-actions">
+                  <button class="btn-take-full" onclick="takeMedCard(this)">&#10003; 已服用</button>
+                  <button class="btn-later-sm" onclick="laterMedCard(this)">30分钟后提醒</button>
+                  <button class="btn-skip" onclick="skipMedCard(this)">跳过</button>
+                </div>
+              </div>
+              <div class="med-card">
+                <div class="mc-left">
+                  <div class="mc-name">阿司匹林肠溶片</div>
+                  <div class="mc-detail">100mg × 1片 · 空腹服用</div>
+                  <div class="mc-disease">心血管保护</div>
+                </div>
+                <div class="mc-actions">
+                  <button class="btn-take-full" onclick="takeMedCard(this)">&#10003; 已服用</button>
+                  <button class="btn-later-sm" onclick="laterMedCard(this)">30分钟后提醒</button>
+                  <button class="btn-skip" onclick="skipMedCard(this)">跳过</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-section" data-time="8">
+              <div class="mt-period">
+                <span class="mt-period-icon">&#127860;</span> 早餐后 · 08:00
+              </div>
+              <div class="med-card">
+                <div class="mc-left">
+                  <div class="mc-name">盐酸二甲双胍片</div>
+                  <div class="mc-detail">0.5g × 1片 · 餐后30分钟</div>
+                  <div class="mc-disease">2型糖尿病</div>
+                  <div class="mc-note">&#9432; 服药期间避免饮酒</div>
+                </div>
+                <div class="mc-actions">
+                  <button class="btn-take-full" onclick="takeMedCard(this)">&#10003; 已服用</button>
+                  <button class="btn-later-sm" onclick="laterMedCard(this)">30分钟后提醒</button>
+                  <button class="btn-skip" onclick="skipMedCard(this)">跳过</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-section" data-time="14.5">
+              <div class="mt-period">
+                <span class="mt-period-icon">&#9728;</span> 午餐后 · 14:30
+              </div>
+              <div class="med-card">
+                <div class="mc-left">
+                  <div class="mc-name">盐酸二甲双胍片</div>
+                  <div class="mc-detail">0.5g × 1片 · 餐后30分钟</div>
+                  <div class="mc-disease">2型糖尿病</div>
+                </div>
+                <div class="mc-actions">
+                  <button class="btn-take-full" onclick="takeMedCard(this)">&#10003; 已服用</button>
+                  <button class="btn-later-sm" onclick="laterMedCard(this)">30分钟后提醒</button>
+                  <button class="btn-skip" onclick="skipMedCard(this)">跳过</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-section" data-time="21">
+              <div class="mt-period">
+                <span class="mt-period-icon">&#127769;</span> 晚间 · 21:00
+              </div>
+              <div class="med-card">
+                <div class="mc-left">
+                  <div class="mc-name">盐酸二甲双胍片</div>
+                  <div class="mc-detail">0.5g × 1片 · 餐后30分钟</div>
+                  <div class="mc-disease">2型糖尿病</div>
+                </div>
+                <div class="mc-actions">
+                  <button class="btn-take-full" onclick="takeMedCard(this)">&#10003; 已服用</button>
+                  <button class="btn-skip" onclick="skipMedCard(this)">跳过</button>
+                </div>
+              </div>
+              <div class="med-card">
+                <div class="mc-left">
+                  <div class="mc-name">阿托伐他汀钙片</div>
+                  <div class="mc-detail">20mg × 1片 · 睡前服用</div>
+                  <div class="mc-disease">高血脂</div>
+                  <div class="mc-note">&#9432; 避免与葡萄柚汁同服</div>
+                </div>
+                <div class="mc-actions">
+                  <button class="btn-take-full" onclick="takeMedCard(this)">&#10003; 已服用</button>
+                  <button class="btn-skip" onclick="skipMedCard(this)">跳过</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 最近问诊 -->
+        <section class="section-block">
+          <div class="section-header">
+            <h3>最近问诊</h3>
+          </div>
+          <div class="visit-card">
+            <div class="visit-info">
+              <div class="visit-row">
+                <span class="visit-label">问诊医生</span>
+                <span class="visit-value">李医生 · 心内科</span>
+              </div>
+              <div class="visit-row">
+                <span class="visit-label">问诊时间</span>
+                <span class="visit-value">2026.03.28</span>
+              </div>
+              <div class="visit-row">
+                <span class="visit-label">问诊方式</span>
+                <span class="visit-value">线上复诊（图文）</span>
+              </div>
+              <div class="visit-row">
+                <span class="visit-label">医嘱摘要</span>
+                <span class="visit-value">血压控制尚可，继续当前方案，注意低盐饮食</span>
+              </div>
+            </div>
+            <div class="visit-actions">
+              <button class="visit-btn" onclick="switchTab('tab-renew')">
+                <span>&#128105;&#8205;&#9877;</span> 发起问诊
+              </button>
+              <button class="visit-btn-sec" onclick="switchTab('tab-renew')">
+                看病和开药记录
+              </button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- ===== 库存页 ===== -->
+    <div class="page" id="page-box">
+      <header class="page-header">
+        <h2>家里剩余药量</h2>
+      </header>
+      <main class="content">
+        <div class="box-overview">
+          <div class="bo-item">
+            <div class="bo-num">4</div>
+            <div class="bo-label">正在吃的药</div>
+          </div>
+          <div class="bo-item">
+            <div class="bo-num warn-text">1</div>
+            <div class="bo-label">快吃完了</div>
+          </div>
+          <div class="bo-item">
+            <div class="bo-num">28</div>
+            <div class="bo-label">一周用药量/片</div>
+          </div>
+        </div>
+
+        <div class="box-list">
+          <div class="box-card urgent">
+            <div class="box-header-row">
+              <div class="box-drug-name">氨氯地平片</div>
+              <span class="box-tag tag-urgent">快吃完了</span>
+            </div>
+            <div class="box-spec">5mg/片 · 络活喜</div>
+            <div class="box-meter">
+              <div class="meter-bar">
+                <div class="meter-fill urgent-fill" style="width:20%"></div>
+              </div>
+              <div class="meter-text">剩余 12 片</div>
+            </div>
+            <div class="box-info-row">
+              <div class="box-info">
+                <span class="box-info-label">日均用量</span>
+                <span>1片/天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">可服天数</span>
+                <span class="warn-text">6天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">预计用完</span>
+                <span class="warn-text">5月1日</span>
+              </div>
+            </div>
+            <div class="box-btn-row">
+              <button class="box-action-btn" onclick="switchTab('tab-renew')">马上再开药</button>
+              <button class="box-edit-btn" onclick="editStock(this, '氨氯地平片', 12)">修正数量</button>
+            </div>
+          </div>
+
+          <div class="box-card normal">
+            <div class="box-header-row">
+              <div class="box-drug-name">盐酸二甲双胍片</div>
+              <span class="box-tag tag-ok">药量充足</span>
+            </div>
+            <div class="box-spec">0.5g/片</div>
+            <div class="box-meter">
+              <div class="meter-bar">
+                <div class="meter-fill ok-fill" style="width:65%"></div>
+              </div>
+              <div class="meter-text">剩余 58 片</div>
+            </div>
+            <div class="box-info-row">
+              <div class="box-info">
+                <span class="box-info-label">日均用量</span>
+                <span>3片/天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">可服天数</span>
+                <span>19天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">预计用完</span>
+                <span>5月14日</span>
+              </div>
+            </div>
+            <button class="box-edit-btn full-w" onclick="editStock(this, '盐酸二甲双胍片', 58)">修正数量</button>
+          </div>
+
+          <div class="box-card normal">
+            <div class="box-header-row">
+              <div class="box-drug-name">阿司匹林肠溶片</div>
+              <span class="box-tag tag-ok">药量充足</span>
+            </div>
+            <div class="box-spec">100mg/片 · 拜阿司匹灵</div>
+            <div class="box-meter">
+              <div class="meter-bar">
+                <div class="meter-fill ok-fill" style="width:80%"></div>
+              </div>
+              <div class="meter-text">剩余 45 片</div>
+            </div>
+            <div class="box-info-row">
+              <div class="box-info">
+                <span class="box-info-label">日均用量</span>
+                <span>1片/天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">可服天数</span>
+                <span>45天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">预计用完</span>
+                <span>6月9日</span>
+              </div>
+            </div>
+            <button class="box-edit-btn full-w" onclick="editStock(this, '阿司匹林肠溶片', 45)">修正数量</button>
+          </div>
+
+          <div class="box-card normal">
+            <div class="box-header-row">
+              <div class="box-drug-name">阿托伐他汀钙片</div>
+              <span class="box-tag tag-ok">药量充足</span>
+            </div>
+            <div class="box-spec">20mg/片 · 立普妥</div>
+            <div class="box-meter">
+              <div class="meter-bar">
+                <div class="meter-fill ok-fill" style="width:55%"></div>
+              </div>
+              <div class="meter-text">剩余 22 片</div>
+            </div>
+            <div class="box-info-row">
+              <div class="box-info">
+                <span class="box-info-label">日均用量</span>
+                <span>1片/天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">可服天数</span>
+                <span>22天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">预计用完</span>
+                <span>5月17日</span>
+              </div>
+            </div>
+            <button class="box-edit-btn full-w" onclick="editStock(this, '阿托伐他汀钙片', 22)">修正数量</button>
+          </div>
+
+          <!-- 提醒：别重复买药 -->
+          <div class="dup-alert">
+            <div class="dup-icon">&#128230;</div>
+            <div class="dup-text">
+              <strong>提醒：别重复买药</strong>
+              <p>阿司匹林库存还有 45 天用量，暂时不需要再次购买</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ===== 看医生 / 再开药页 ===== -->
+    <div class="page" id="page-renew">
+      <header class="page-header">
+        <h2>看医生 / 再开药</h2>
+      </header>
+      <main class="content">
+
+        <!-- 待问诊卡片（预约后显示） -->
+        <div class="pending-visit-card" id="pendingVisit" style="display:none">
+          <div class="pv-status-bar">
+            <span class="pv-status-dot"></span>
+            <span class="pv-status-text">待问诊</span>
+          </div>
+          <div class="pv-body">
+            <div class="pv-doctor-row">
+              <div class="pv-avatar" id="pvAvatar">李</div>
+              <div class="pv-info">
+                <div class="pv-doctor-name" id="pvDoctorName">李建华 · 心内科</div>
+                <div class="pv-time" id="pvTime">图文问诊 · 4/26 10:00</div>
+              </div>
+            </div>
+            <div class="pv-attach">
+              <span>&#10003; 已附带服药记录</span>
+              <span>&#10003; 已附带用药方案</span>
+              <span>&#10003; 已附带库存情况</span>
+            </div>
+            <button class="pv-enter-btn" onclick="enterConsultation()">进入问诊</button>
+          </div>
+        </div>
+
+        <!-- 快捷入口 -->
+        <div class="visit-quick-entries">
+          <div class="vq-card" onclick="openBooking('text')">
+            <div class="vq-icon">&#128172;</div>
+            <div class="vq-name">图文问诊</div>
+            <div class="vq-desc">随时发消息</div>
+          </div>
+          <div class="vq-card" onclick="openBooking('phone')">
+            <div class="vq-icon">&#128222;</div>
+            <div class="vq-name">电话问诊</div>
+            <div class="vq-desc">医生回拨</div>
+          </div>
+          <div class="vq-card" onclick="quickRenew()">
+            <div class="vq-icon">&#128203;</div>
+            <div class="vq-name">一键再开药</div>
+            <div class="vq-desc">无需问诊</div>
+          </div>
+        </div>
+
+        <!-- 我的医生 -->
+        <section class="section-block">
+          <div class="section-header"><h3>我的医生</h3></div>
+          <div class="doctor-card" onclick="openBooking('text')">
+            <div class="doc-avatar">李</div>
+            <div class="doc-info">
+              <div class="doc-name">李建华 <span class="doc-title">主任医师</span></div>
+              <div class="doc-dept">北京协和医院 · 心内科</div>
+              <div class="doc-tags">
+                <span class="doc-tag">高血压</span>
+                <span class="doc-tag">冠心病</span>
+              </div>
+            </div>
+            <div class="doc-action">
+              <div class="doc-status online">在线</div>
+            </div>
+          </div>
+          <div class="doctor-card" onclick="openBooking('text')">
+            <div class="doc-avatar">王</div>
+            <div class="doc-info">
+              <div class="doc-name">王明芳 <span class="doc-title">副主任医师</span></div>
+              <div class="doc-dept">北京协和医院 · 内分泌科</div>
+              <div class="doc-tags">
+                <span class="doc-tag">糖尿病</span>
+                <span class="doc-tag">甲状腺</span>
+              </div>
+            </div>
+            <div class="doc-action">
+              <div class="doc-status offline">明日可约</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 下次复诊 -->
+        <div class="renew-next">
+          <div class="rn-icon">&#128197;</div>
+          <div class="rn-info">
+            <div class="rn-title">下次复诊</div>
+            <div class="rn-date">2026年5月10日（周日）</div>
+          </div>
+          <div class="rn-countdown">
+            <span class="rn-days">15</span>
+            <span class="rn-unit">天后</span>
+          </div>
+        </div>
+
+        <!-- 续方进度 -->
+        <section class="section-block">
+          <div class="section-header"><h3>氨氯地平再开药进度</h3></div>
+          <div class="renew-steps" id="renewSteps">
+            <div class="rs-step active-step" id="rsStep1">
+              <div class="rs-dot filled"></div>
+              <div class="rs-line filled-line"></div>
+              <div class="rs-content">
+                <div class="rs-title">系统提醒已触发</div>
+                <div class="rs-desc">4月25日 · 库存低于7天用量</div>
+              </div>
+            </div>
+            <div class="rs-step current-step" id="rsStep2">
+              <div class="rs-dot current-dot"></div>
+              <div class="rs-line"></div>
+              <div class="rs-content">
+                <div class="rs-title">准备开药资料</div>
+                <div class="rs-desc">请确认以下信息完整</div>
+              </div>
+            </div>
+            <div class="rs-step" id="rsStep3">
+              <div class="rs-dot"></div>
+              <div class="rs-line"></div>
+              <div class="rs-content">
+                <div class="rs-title">医师审核处方</div>
+                <div class="rs-desc">预计 1-2 个工作日</div>
+              </div>
+            </div>
+            <div class="rs-step" id="rsStep4">
+              <div class="rs-dot"></div>
+              <div class="rs-content">
+                <div class="rs-title">下单购药配送</div>
+                <div class="rs-desc">美团送药最快30分钟达</div>
+                <button class="rs-order-btn" id="rsOrderBtn" style="display:none" onclick="openRenewOrder()">立即下单购药</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 开药前准备清单 -->
+        <section class="section-block">
+          <div class="section-header">
+            <h3>开药前准备清单</h3>
+            <span class="cl-progress-tag" id="clProgressTag">3/4 项已就绪</span>
+          </div>
+          <!-- 智能结论 -->
+          <div class="renew-verdict verdict-warn" id="clVerdict">
+            <div class="verdict-icon">&#9888;</div>
+            <div class="verdict-text">
+              <div class="verdict-title">还需补充 1 项资料才能续方</div>
+              <div class="verdict-desc">缺少近期血压记录，上传后即可一键再开药</div>
+            </div>
+          </div>
+
+          <!-- 清单条目 -->
+          <div class="checklist expanded">
+            <!-- 已就绪：服药记录 -->
+            <div class="cl-item checked">
+              <span class="cl-check">&#10003;</span>
+              <div class="cl-content">
+                <div class="cl-title">近 7 日服药记录</div>
+                <div class="cl-desc">系统已自动采集，共 33/35 次按时服药</div>
+                <div class="cl-source">来源：每日服药打卡记录</div>
+              </div>
+            </div>
+
+            <!-- 已就绪：历史处方 -->
+            <div class="cl-item checked">
+              <span class="cl-check">&#10003;</span>
+              <div class="cl-content">
+                <div class="cl-title">历史处方可复用</div>
+                <div class="cl-desc">2026.3.28 李建华医生开具，含氨氯地平 5mg × 30 片</div>
+                <div class="cl-source">来源：问诊处方记录</div>
+              </div>
+            </div>
+
+            <!-- 未就绪：血压记录 -->
+            <div class="cl-item unchecked" id="clBloodPressure">
+              <span class="cl-uncheck" id="clBpIcon">&#9675;</span>
+              <div class="cl-content">
+                <div class="cl-title">近期血压/血糖记录 <span class="cl-required">需补充</span></div>
+                <div class="cl-desc">需要最近 3 天内的测量数据，医生审核处方时需参考</div>
+                <div class="cl-require">需要准备：血压值（收缩压/舒张压）、测量日期和时间</div>
+                <!-- 已上传的记录 -->
+                <div class="cl-uploaded-list" id="uploadedRecords"></div>
+                <!-- 上传区域 -->
+                <div class="cl-upload-area" id="bpUploadArea">
+                  <div class="cl-upload-tabs">
+                    <button class="cl-upload-tab active" onclick="switchUploadTab(this, 'manual')">手动输入</button>
+                    <button class="cl-upload-tab" onclick="switchUploadTab(this, 'photo')">拍照/相册</button>
+                  </div>
+                  <!-- 手动输入 -->
+                  <div class="cl-upload-panel" id="uploadManual">
+                    <div class="bp-input-row">
+                      <div class="bp-input-group">
+                        <label>收缩压 (mmHg)</label>
+                        <input type="number" class="bp-input" id="bpSystolic" placeholder="如 135">
+                      </div>
+                      <span class="bp-slash">/</span>
+                      <div class="bp-input-group">
+                        <label>舒张压 (mmHg)</label>
+                        <input type="number" class="bp-input" id="bpDiastolic" placeholder="如 85">
+                      </div>
+                    </div>
+                    <div class="bp-input-row">
+                      <div class="bp-input-group full">
+                        <label>测量时间</label>
+                        <select class="bp-select" id="bpTime">
+                          <option value="今天早上">今天早上</option>
+                          <option value="今天下午">今天下午</option>
+                          <option value="昨天早上">昨天早上</option>
+                          <option value="昨天下午">昨天下午</option>
+                          <option value="前天早上">前天早上</option>
+                          <option value="前天下午">前天下午</option>
+                        </select>
+                      </div>
+                    </div>
+                    <button class="cl-upload-btn" onclick="submitBpRecord()">提交记录</button>
+                  </div>
+                  <!-- 拍照上传 -->
+                  <div class="cl-upload-panel" id="uploadPhoto" style="display:none">
+                    <div class="cl-photo-drop" onclick="simulatePhotoUpload()">
+                      <div class="cl-photo-icon">&#128247;</div>
+                      <div class="cl-photo-text">点击拍照或从相册选取</div>
+                      <div class="cl-photo-hint">支持血压计屏幕照片，系统会自动识别读数</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 已就绪：无连续漏服 -->
+            <div class="cl-item checked">
+              <span class="cl-check">&#10003;</span>
+              <div class="cl-content">
+                <div class="cl-title">无连续漏服记录</div>
+                <div class="cl-desc">近 7 日无连续 2 次以上漏服，符合直接续方条件</div>
+                <div class="cl-source">来源：服药打卡数据分析</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 问诊记录 & 历史处方 -->
+        <section class="section-block">
+          <div class="section-header"><h3>看病和开药记录</h3></div>
+          <div class="rx-list">
+            <div class="rx-card">
+              <div class="rx-top-row">
+                <div class="rx-date">2026.03.28</div>
+                <span class="rx-type type-text">图文问诊</span>
+              </div>
+              <div class="rx-doctor">李建华 · 心内科</div>
+              <div class="rx-summary">血压控制尚可，继续当前方案，注意低盐饮食，下次复诊带近期血压记录</div>
+              <div class="rx-drugs">处方：氨氯地平 5mg × 30片、阿司匹林 100mg × 30片</div>
+              <div class="rx-hospital">北京协和医院互联网医院</div>
+            </div>
+            <div class="rx-card">
+              <div class="rx-top-row">
+                <div class="rx-date">2026.02.25</div>
+                <span class="rx-type type-text">图文问诊</span>
+              </div>
+              <div class="rx-doctor">王明芳 · 内分泌科</div>
+              <div class="rx-summary">空腹血糖 6.8，糖化血红蛋白 6.5%，控制良好，继续用药并注意饮食</div>
+              <div class="rx-drugs">处方：二甲双胍 0.5g × 90片、阿托伐他汀 20mg × 30片</div>
+              <div class="rx-hospital">北京协和医院互联网医院</div>
+            </div>
+            <div class="rx-card">
+              <div class="rx-top-row">
+                <div class="rx-date">2026.01.20</div>
+                <span class="rx-type type-phone">电话问诊</span>
+              </div>
+              <div class="rx-doctor">李建华 · 心内科</div>
+              <div class="rx-summary">近期血压波动较大，将氨氯地平从 2.5mg 调整至 5mg，两周后复查</div>
+              <div class="rx-drugs">处方：氨氯地平 5mg × 14片</div>
+              <div class="rx-hospital">北京协和医院互联网医院</div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ===== AI 智能体客服页 ===== -->
+    <div class="page page-chat" id="page-ai">
+      <header class="page-header">
+        <h2>AI 用药助手</h2>
+        <div class="ai-disclaimer">仅供参考，异常请及时复诊</div>
+      </header>
+      <div class="chat-scroll" id="chatScroll">
+        <div class="content chat-content">
+          <div class="chat-welcome">
+            <div class="chat-ai-avatar">AI</div>
+            <div class="chat-welcome-text" id="welcomeText">
+              张叔叔好！上次您提到血压偏高，最近有好转吗？氨氯地平还剩6天用量，需要我帮您续方吗？
+            </div>
+          </div>
+
+          <!-- 能力标签栏 -->
+          <div class="agent-skills" id="agentSkills">
+            <button class="skill-tag active" data-skill="medMgmt" onclick="switchSkill(this)">用药管理</button>
+            <button class="skill-tag" data-skill="stockQuery" onclick="switchSkill(this)">库存查询</button>
+            <button class="skill-tag" data-skill="renew" onclick="switchSkill(this)">续方购药</button>
+            <button class="skill-tag" data-skill="booking" onclick="switchSkill(this)">预约问诊</button>
+            <button class="skill-tag" data-skill="health" onclick="switchSkill(this)">健康记录</button>
+          </div>
+
+          <!-- 快捷问题（按能力分组） -->
+          <div class="quick-questions" id="quickQuestions">
+            <!-- JS动态渲染 -->
+          </div>
+
+          <!-- 对话消息区 -->
+          <div id="chatMessages"></div>
+        </div>
+      </div>
+      <div class="chat-input-bar">
+        <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" aria-label="语音输入">&#127908;</button>
+        <button class="plus-btn" id="plusBtn" onclick="togglePlusMenu()">+</button>
+        <input type="text" id="chatInput" placeholder="输入或按住说话..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="chat-send" onclick="sendChat()" aria-label="发送">&#10148;</button>
+      </div>
+    </div>
+
+    <!-- 能力快捷菜单 -->
+    <div class="plus-menu-overlay" id="plusMenuOverlay" onclick="closePlusMenu()">
+      <div class="plus-menu" id="plusMenu" onclick="event.stopPropagation()">
+        <div class="plus-menu-title">快捷能力</div>
+        <div class="plus-menu-grid">
+          <div class="plus-menu-item" onclick="plusMenuAction('medMgmt')">
+            <div class="pm-icon">&#128138;</div>
+            <div class="pm-label">用药管理</div>
+          </div>
+          <div class="plus-menu-item" onclick="plusMenuAction('stockQuery')">
+            <div class="pm-icon">&#128230;</div>
+            <div class="pm-label">库存查询</div>
+          </div>
+          <div class="plus-menu-item" onclick="plusMenuAction('renew')">
+            <div class="pm-icon">&#128203;</div>
+            <div class="pm-label">续方购药</div>
+          </div>
+          <div class="plus-menu-item" onclick="plusMenuAction('booking')">
+            <div class="pm-icon">&#128197;</div>
+            <div class="pm-label">预约问诊</div>
+          </div>
+          <div class="plus-menu-item" onclick="plusMenuAction('health')">
+            <div class="pm-icon">&#10084;</div>
+            <div class="pm-label">健康记录</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 个人中心页 ===== -->
+    <div class="page" id="page-profile">
+      <!-- 个人信息头部 -->
+      <div class="profile-user">
+        <div class="profile-avatar">张</div>
+        <div class="profile-info">
+          <div class="profile-name">张建国</div>
+          <div class="profile-tags">
+            <span class="p-tag">高血压</span>
+            <span class="p-tag">2型糖尿病</span>
+            <span class="p-tag">高血脂</span>
+          </div>
+        </div>
+        <div class="score-badge-sm" onclick="document.getElementById('scoreModal').classList.add('show')">
+          <span class="score-num-sm">92</span>
+          <span class="score-label-sm">吃药评分 · 优秀</span>
+        </div>
+      </div>
+
+      <main class="content">
+        <!-- 家属管理 -->
+        <div class="panel-section">
+          <div class="panel-section-title">&#128106; 家属协同管理</div>
+          <div class="family-list">
+            <div class="family-card">
+              <div class="family-avatar">小</div>
+              <div class="family-info">
+                <div class="family-name">张小明 <span class="family-role">儿子</span></div>
+                <div class="family-phone">138****6789</div>
+              </div>
+              <div class="family-status bound">已绑定</div>
+            </div>
+            <div class="family-card" onclick="openAddFamily()">
+              <div class="family-avatar add-avatar">+</div>
+              <div class="family-info">
+                <div class="family-name add-text">添加家属</div>
+                <div class="family-phone">邀请家人共同管理用药</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 家属通知设置 -->
+          <div class="notify-settings">
+            <div class="notify-row">
+              <div>
+                <div class="notify-title">漏服通知家属</div>
+                <div class="notify-desc">连续漏服 2 次时通知绑定家属</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="notify-row">
+              <div>
+                <div class="notify-title">库存预警同步</div>
+                <div class="notify-desc">家里剩余药量不足时同步通知家属</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="notify-row">
+              <div>
+                <div class="notify-title">家属查看用药记录</div>
+                <div class="notify-desc">允许绑定家属查看服药打卡和库存</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 提醒设置 -->
+        <div class="panel-section">
+          <div class="panel-section-title">&#128276; 提醒偏好</div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">应用通知</div>
+              <div class="notify-desc">通过App推送消息提醒服药</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">短信通知</div>
+              <div class="notify-desc">发送短信到绑定手机号提醒</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">震动提醒</div>
+              <div class="notify-desc">到服药时间时手机震动提示</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">闹钟提醒</div>
+              <div class="notify-desc">设置闹钟响铃，防止错过服药</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">提前提醒</div>
+              <div class="notify-desc">在服药时间前多久提醒您</div>
+            </div>
+            <div class="time-picker-group">
+              <button class="time-opt" onclick="pickTime(this)">准时</button>
+              <button class="time-opt selected" onclick="pickTime(this)">5分钟</button>
+              <button class="time-opt" onclick="pickTime(this)">10分钟</button>
+              <button class="time-opt" onclick="pickTime(this)">15分钟</button>
+              <button class="time-opt" onclick="pickTime(this)">30分钟</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 字体大小 -->
+        <div class="panel-section">
+          <div class="panel-section-title">&#128269; 字体大小</div>
+          <div class="notify-row" style="flex-direction:column;align-items:flex-start">
+            <div><div class="notify-title">选择适合您的字体大小</div></div>
+            <div class="font-size-picker">
+              <button class="font-size-opt selected" onclick="setFontSize(this, '')">标准</button>
+              <button class="font-size-opt" onclick="setFontSize(this, 'font-large')">大字</button>
+              <button class="font-size-opt" onclick="setFontSize(this, 'font-xl')">超大字</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 其��� -->
+        <div class="panel-section">
+          <div class="panel-section-title">&#9881; 其他</div>
+          <div class="notify-row">
+            <div><div class="notify-title">我的问诊记录</div></div>
+            <span class="notify-arrow">&rsaquo;</span>
+          </div>
+          <div class="notify-row" onclick="openMedData()" style="cursor:pointer">
+            <div><div class="notify-title">用药数据</div></div>
+            <span class="notify-arrow">&rsaquo;</span>
+          </div>
+          <div class="notify-row">
+            <div><div class="notify-title">关于慢病用药小管家</div></div>
+            <span class="notify-arrow">&rsaquo;</span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ===== 底部导航 ===== -->
+    <nav class="tab-bar" role="tablist" aria-label="主导航">
+      <div class="tab active" id="tab-home" onclick="switchTab('tab-home')">
+        <div class="tab-icon">&#127968;</div>
+        <div class="tab-label">首页</div>
+      </div>
+      <div class="tab" id="tab-box" onclick="switchTab('tab-box')">
+        <div class="tab-icon">&#128230;</div>
+        <div class="tab-label">药量</div>
+      </div>
+      <div class="tab" id="tab-renew" onclick="switchTab('tab-renew')">
+        <div class="tab-icon">&#128105;&#8205;&#9877;</div>
+        <div class="tab-label">看医生</div>
+      </div>
+      <div class="tab" id="tab-ai" onclick="switchTab('tab-ai')">
+        <div class="tab-icon">&#129302;</div>
+        <div class="tab-label">AI助手</div>
+      </div>
+      <div class="tab" id="tab-profile" onclick="switchTab('tab-profile')">
+        <div class="tab-icon">&#128100;</div>
+        <div class="tab-label">个人中心</div>
+      </div>
+    </nav>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 撤销浮条 -->
+    <div class="undo-toast" id="undoToast">
+      <span id="undoToastText"></span>
+      <button class="undo-toast-btn" id="undoToastBtn">撤回</button>
+    </div>
+
+    <!-- 吃药情况弹窗 -->
+    <div class="modal-overlay" id="scoreModal" onclick="closeScoreModal(event)">
+      <div class="modal-content">
+        <div class="modal-close" onclick="document.getElementById('scoreModal').classList.remove('show')">&times;</div>
+        <h3>吃药情况报告</h3>
+        <div class="score-circle">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#e8f5e9" stroke-width="10"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#43a047" stroke-width="10"
+              stroke-dasharray="327" stroke-dashoffset="26" stroke-linecap="round"
+              transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="score-center">
+            <span class="score-big">92</span>
+            <span class="score-unit">分</span>
+          </div>
+        </div>
+        <div class="score-detail">
+          <div class="sd-row">
+            <span>近 7 日按时服药</span><span><strong>33</strong>/35 次</span>
+          </div>
+          <div class="sd-row">
+            <span>漏服次数</span><span class="warn-text"><strong>2</strong> 次</span>
+          </div>
+          <div class="sd-row">
+            <span>延迟服药</span><span><strong>3</strong> 次</span>
+          </div>
+          <div class="sd-row">
+            <span>连续按时天数</span><span><strong>4</strong> 天</span>
+          </div>
+        </div>
+        <div class="score-tip">
+          &#128161; 保持当前节奏，建议每天设置固定服药时间，养成习惯后依从性会更高。
+        </div>
+      </div>
+    </div>
+
+    <!-- 跳过原因弹窗 -->
+    <div class="modal-overlay" id="skipModal">
+      <div class="modal-content modal-sm">
+        <h3>跳过原因</h3>
+        <div class="skip-options">
+          <button class="skip-opt" onclick="confirmSkip('副作用不适')">副作用不适</button>
+          <button class="skip-opt" onclick="confirmSkip('忘记携带药物')">忘记携带药物</button>
+          <button class="skip-opt" onclick="confirmSkip('医生建议暂停')">医生建议暂停</button>
+          <button class="skip-opt" onclick="confirmSkip('其他原因')">其他原因</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 添加家属弹窗 -->
+    <div class="modal-overlay" id="addFamilyModal" onclick="if(event.target===this)this.classList.remove('show')">
+      <div class="modal-content">
+        <div class="modal-close" onclick="document.getElementById('addFamilyModal').classList.remove('show')">&times;</div>
+        <h3>添加家属</h3>
+        <div class="form-group">
+          <label class="form-label">家属姓名</label>
+          <input type="text" class="form-input" id="familyName" placeholder="请输入姓名">
+        </div>
+        <div class="form-group">
+          <label class="form-label">与您的关系</label>
+          <div class="relation-picker">
+            <button class="relation-opt" onclick="pickRelation(this)">配偶</button>
+            <button class="relation-opt" onclick="pickRelation(this)">子女</button>
+            <button class="relation-opt" onclick="pickRelation(this)">父母</button>
+            <button class="relation-opt" onclick="pickRelation(this)">兄弟姐妹</button>
+            <button class="relation-opt" onclick="pickRelation(this)">其他</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">手机号</label>
+          <input type="tel" class="form-input" id="familyPhone" placeholder="请输入家属手机号">
+        </div>
+        <div class="form-tip">绑定后，家属将收到短信邀请，确认后即可共同管理用药</div>
+        <button class="btn-primary-lg" style="width:100%;margin-top:16px" onclick="confirmAddFamily()">发送绑定邀请</button>
+      </div>
+    </div>
+
+    <!-- 用药数据弹窗 -->
+    <div class="modal-overlay" id="medDataModal" onclick="if(event.target===this)this.classList.remove('show')">
+      <div class="modal-content modal-lg">
+        <div class="modal-close" onclick="document.getElementById('medDataModal').classList.remove('show')">&times;</div>
+        <h3>用药数据</h3>
+
+        <!-- 时间范围选择 -->
+        <div class="data-range">
+          <button class="range-opt selected" onclick="pickRange(this)">近 7 天</button>
+          <button class="range-opt" onclick="pickRange(this)">近 30 天</button>
+          <button class="range-opt" onclick="pickRange(this)">近 90 天</button>
+        </div>
+
+        <!-- 数据概览 -->
+        <div class="data-overview">
+          <div class="do-item">
+            <div class="do-num" style="color:var(--primary)">92%</div>
+            <div class="do-label">按时服药率</div>
+          </div>
+          <div class="do-item">
+            <div class="do-num" style="color:var(--danger)">2</div>
+            <div class="do-label">漏服次数</div>
+          </div>
+          <div class="do-item">
+            <div class="do-num" style="color:var(--accent)">3</div>
+            <div class="do-label">延迟服药</div>
+          </div>
+        </div>
+
+        <!-- 每日柱状图 -->
+        <div class="data-section-title">每日服药完成情况</div>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <span class="bar-date">4/19</span>
+            <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+            <span class="bar-val">5/5</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-date">4/20</span>
+            <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+            <span class="bar-val">5/5</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-date">4/21</span>
+            <div class="bar-track"><div class="bar-fill" style="width:80%"></div></div>
+            <span class="bar-val">4/5</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-date">4/22</span>
+            <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+            <span class="bar-val">5/5</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-date">4/23</span>
+            <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+            <span class="bar-val">5/5</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-date">4/24</span>
+            <div class="bar-track"><div class="bar-fill miss" style="width:80%"></div></div>
+            <span class="bar-val warn-text">4/5</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-date">4/25</span>
+            <div class="bar-track"><div class="bar-fill current-bar" style="width:60%"></div></div>
+            <span class="bar-val">3/5</span>
+          </div>
+        </div>
+
+        <!-- 详细记录 -->
+        <div class="data-section-title">服药明细记录</div>
+        <div class="data-table">
+          <div class="dt-header">
+            <span class="dt-col-date">日期</span>
+            <span class="dt-col-drug">药品</span>
+            <span class="dt-col-time">计划</span>
+            <span class="dt-col-status">状态</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-col-date">4/25</span>
+            <span class="dt-col-drug">氨氯地平</span>
+            <span class="dt-col-time">07:00</span>
+            <span class="dt-col-status status-done">07:12 已服</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-col-date">4/25</span>
+            <span class="dt-col-drug">阿司匹林</span>
+            <span class="dt-col-time">07:00</span>
+            <span class="dt-col-status status-done">07:12 已服</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-col-date">4/25</span>
+            <span class="dt-col-drug">二甲双胍</span>
+            <span class="dt-col-time">08:00</span>
+            <span class="dt-col-status status-done">08:23 已服</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-col-date">4/25</span>
+            <span class="dt-col-drug">二甲双胍</span>
+            <span class="dt-col-time">14:30</span>
+            <span class="dt-col-status status-wait">待服用</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-col-date">4/25</span>
+            <span class="dt-col-drug">二甲双胍</span>
+            <span class="dt-col-time">21:00</span>
+            <span class="dt-col-status status-wait">待服用</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-col-date">4/25</span>
+            <span class="dt-col-drug">阿托伐他汀</span>
+            <span class="dt-col-time">21:00</span>
+            <span class="dt-col-status status-wait">待服用</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-col-date">4/24</span>
+            <span class="dt-col-drug">二甲双胍</span>
+            <span class="dt-col-time">21:00</span>
+            <span class="dt-col-status status-miss">漏服</span>
+          </div>
+          <div class="dt-row">
+            <span class="dt-col-date">4/21</span>
+            <span class="dt-col-drug">阿托伐他汀</span>
+            <span class="dt-col-time">21:00</span>
+            <span class="dt-col-status status-late">21:47 延迟</span>
+          </div>
+        </div>
+
+        <!-- 导出按钮 -->
+        <div class="export-actions">
+          <button class="btn-export" onclick="exportData('pdf')">
+            <span class="export-icon">&#128196;</span>
+            <div>
+              <div class="export-title">导出 PDF 报告</div>
+              <div class="export-desc">适合打印或给医生查看</div>
+            </div>
+          </button>
+          <button class="btn-export" onclick="exportData('excel')">
+            <span class="export-icon">&#128202;</span>
+            <div>
+              <div class="export-title">导出 Excel 表格</div>
+              <div class="export-desc">详细记录，方便数据分析</div>
+            </div>
+          </button>
+          <button class="btn-export" onclick="exportData('share')">
+            <span class="export-icon">&#128228;</span>
+            <div>
+              <div class="export-title">分享给家属或医生</div>
+              <div class="export-desc">生成链接，对方可直接查看</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 库存修正弹窗 -->
+    <div class="modal-overlay" id="stockModal" onclick="if(event.target===this)this.classList.remove('show')">
+      <div class="modal-content modal-sm">
+        <div class="modal-close" onclick="document.getElementById('stockModal').classList.remove('show')">&times;</div>
+        <h3>修正库存数量</h3>
+        <div class="stock-edit-drug" id="stockDrugName"></div>
+        <div class="form-group">
+          <label class="form-label">当前库存（片）</label>
+          <div class="stock-stepper">
+            <button class="stepper-btn" onclick="stepStock(-1)">-</button>
+            <input type="number" class="stepper-input" id="stockInput" value="0">
+            <button class="stepper-btn" onclick="stepStock(1)">+</button>
+          </div>
+        </div>
+        <div class="form-tip">修正后系统将重新计算剩余天数和续方提醒时间</div>
+        <button class="btn-primary-lg" style="width:100%;margin-top:12px" onclick="confirmStock()">确认修正</button>
+      </div>
+    </div>
+
+    <!-- 预约问诊弹窗 -->
+    <div class="modal-overlay" id="bookingModal" onclick="if(event.target===this)this.classList.remove('show')">
+      <div class="modal-content modal-lg">
+        <div class="modal-close" onclick="document.getElementById('bookingModal').classList.remove('show')">&times;</div>
+        <h3>预约问诊</h3>
+
+        <!-- 问诊方式 -->
+        <div class="form-group">
+          <label class="form-label">问诊方式</label>
+          <div class="booking-types">
+            <button class="bt-opt" id="bt-text" onclick="pickBookingType(this, 'text')">
+              <span class="bt-icon">&#128172;</span>图文问诊
+            </button>
+            <button class="bt-opt" id="bt-phone" onclick="pickBookingType(this, 'phone')">
+              <span class="bt-icon">&#128222;</span>电话问诊
+            </button>
+          </div>
+        </div>
+
+        <!-- 选择医生 -->
+        <div class="form-group">
+          <label class="form-label">选择医生</label>
+          <div class="booking-doctors">
+            <div class="bd-card selected" onclick="pickDoctor(this)">
+              <div class="bd-avatar">李</div>
+              <div class="bd-info">
+                <div class="bd-name">李建华</div>
+                <div class="bd-dept">心内科 · 主任医师</div>
+              </div>
+              <div class="bd-check">&#10003;</div>
+            </div>
+            <div class="bd-card" onclick="pickDoctor(this)">
+              <div class="bd-avatar">王</div>
+              <div class="bd-info">
+                <div class="bd-name">王明芳</div>
+                <div class="bd-dept">内分泌科 · 副主任医师</div>
+              </div>
+              <div class="bd-check">&#10003;</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 选择时间 -->
+        <div class="form-group">
+          <label class="form-label">选择日期</label>
+          <div class="booking-dates">
+            <button class="bdate-opt" onclick="pickBDate(this)">
+              <div class="bdate-day">今天</div>
+              <div class="bdate-num">4/25</div>
+            </button>
+            <button class="bdate-opt selected" onclick="pickBDate(this)">
+              <div class="bdate-day">明天</div>
+              <div class="bdate-num">4/26</div>
+            </button>
+            <button class="bdate-opt" onclick="pickBDate(this)">
+              <div class="bdate-day">周一</div>
+              <div class="bdate-num">4/27</div>
+            </button>
+            <button class="bdate-opt" onclick="pickBDate(this)">
+              <div class="bdate-day">周二</div>
+              <div class="bdate-num">4/28</div>
+            </button>
+            <button class="bdate-opt" onclick="pickBDate(this)">
+              <div class="bdate-day">周三</div>
+              <div class="bdate-num">4/29</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">选择时段</label>
+          <div class="booking-times">
+            <button class="btime-opt" onclick="pickBTime(this)">08:00</button>
+            <button class="btime-opt" onclick="pickBTime(this)">09:00</button>
+            <button class="btime-opt selected" onclick="pickBTime(this)">10:00</button>
+            <button class="btime-opt" onclick="pickBTime(this)">14:00</button>
+            <button class="btime-opt" onclick="pickBTime(this)">15:00</button>
+            <button class="btime-opt disabled">16:00</button>
+          </div>
+        </div>
+
+        <!-- 病情描述 -->
+        <div class="form-group">
+          <label class="form-label">病情描述 <span style="color:var(--text-third);font-weight:400">（选填）</span></label>
+          <textarea class="form-textarea" id="bookingDesc" placeholder="简单描述您的症状或想咨询的问题，方便医生提前了解情况"></textarea>
+        </div>
+
+        <!-- 系统自动附带的信息 -->
+        <div class="auto-attach">
+          <div class="aa-title">系统将自动附带以下信息给医生：</div>
+          <div class="aa-list">
+            <span class="aa-item">&#10003; 近7日服药记录</span>
+            <span class="aa-item">&#10003; 当前用药方案</span>
+            <span class="aa-item">&#10003; 家里剩余药量情况</span>
+          </div>
+        </div>
+
+        <button class="btn-primary-lg" style="width:100%;margin-top:16px" onclick="confirmBooking()">确认预约</button>
+      </div>
+    </div>
+
+    <!-- ===== 问诊界面（全屏覆盖） ===== -->
+    <div class="consult-overlay" id="consultOverlay">
+      <div class="consult-page">
+        <header class="consult-header">
+          <button class="consult-back" onclick="exitConsultation()">&#8249; 返回</button>
+          <div class="consult-header-info">
+            <span class="consult-doctor-name" id="consultDoctorName">李建华 · 心内科</span>
+            <span class="consult-type" id="consultType">图文问诊</span>
+          </div>
+          <button class="consult-end-btn" onclick="endConsultation()">结束问诊</button>
+        </header>
+
+        <div class="consult-chat-scroll" id="consultChatScroll">
+          <div class="consult-chat-area" id="consultChatArea">
+            <!-- 系统自动发送的患者资料 -->
+            <div class="consult-system-msg">
+              <div class="csm-title">系统已自动发送以下资料给医生</div>
+              <div class="csm-cards">
+                <div class="csm-card">
+                  <div class="csm-card-title">近 7 日服药记录</div>
+                  <div class="csm-card-body">按时服药 33/35 次，依从率 92%<br>漏服：4/24 晚间二甲双胍 1 次</div>
+                </div>
+                <div class="csm-card">
+                  <div class="csm-card-title">当前用药方案</div>
+                  <div class="csm-card-body">氨氯地平 5mg 1次/日<br>阿司匹林 100mg 1次/日<br>二甲双胍 0.5g 3次/日<br>阿托伐他汀 20mg 1次/日</div>
+                </div>
+                <div class="csm-card">
+                  <div class="csm-card-title">家里剩余药量</div>
+                  <div class="csm-card-body">氨氯地平剩 12 片（6天）<span style="color:var(--danger)"> 紧张</span><br>其余 3 种药量充足</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 医生自动回复 -->
+            <div class="consult-msg doctor">
+              <div class="consult-msg-avatar">李</div>
+              <div class="consult-msg-bubble">
+                您好张叔叔，我已经看到您的用药记录了。整体服药情况不错。<br><br>我看到氨氯地平快用完了，我先了解一下近期情况，请问最近血压测量怎么样？
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 快捷回复 + 输入框 -->
+        <div class="consult-quick-replies">
+          <button class="cqr-btn" onclick="consultQuickReply(this)">最近血压基本在 135/85 左右</button>
+          <button class="cqr-btn" onclick="consultQuickReply(this)">偶尔头晕，不确定是不是血压高</button>
+          <button class="cqr-btn" onclick="consultQuickReply(this)">没什么不舒服，想继续开药</button>
+        </div>
+        <div class="consult-input-bar">
+          <input type="text" id="consultInput" placeholder="输入消息..." onkeydown="if(event.key==='Enter')sendConsultMsg()">
+          <button class="consult-send" onclick="sendConsultMsg()">&#10148;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 问诊小结弹窗 -->
+    <div class="modal-overlay" id="consultSummaryModal">
+      <div class="modal-content modal-lg">
+        <h3>问诊小结</h3>
+        <div class="cs-doctor-row">
+          <div class="cs-avatar">李</div>
+          <div class="cs-info">
+            <div class="cs-name">李建华 · 主任医师</div>
+            <div class="cs-dept">北京协和医院 · 心内科</div>
+          </div>
+          <span class="rx-type type-text" id="csSummaryType">图文问诊</span>
+        </div>
+
+        <div class="cs-section">
+          <div class="cs-section-title">医嘱</div>
+          <div class="cs-section-body cs-advice">
+            血压控制尚可，继续当前氨氯地平 5mg 方案。建议每日定时测量血压并记录，低盐低脂饮食，适量运动，避免情绪激动。
+          </div>
+        </div>
+
+        <div class="cs-section">
+          <div class="cs-section-title">处方</div>
+          <div class="cs-rx-list">
+            <div class="cs-rx-item">
+              <div class="cs-rx-name">氨氯地平片 5mg</div>
+              <div class="cs-rx-detail">30片 · 1次/日 · 晨起空腹</div>
+            </div>
+            <div class="cs-rx-item">
+              <div class="cs-rx-name">阿司匹林肠溶片 100mg</div>
+              <div class="cs-rx-detail">30片 · 1次/日 · 晨起空腹</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cs-section">
+          <div class="cs-section-title">下次复诊</div>
+          <div class="cs-section-body">2026年5月25日（4周后），届时系统将自动提醒</div>
+        </div>
+
+        <div class="cs-sync-info">
+          <div class="cs-sync-title">以下信息将同步到您的用药计划：</div>
+          <div class="cs-sync-list">
+            <label class="cs-sync-item">
+              <input type="checkbox" checked disabled>
+              <span>更新用药方案（氨氯地平、阿司匹林）</span>
+            </label>
+            <label class="cs-sync-item">
+              <input type="checkbox" checked disabled>
+              <span>更新家里剩余药量（处方购药后自动入库）</span>
+            </label>
+            <label class="cs-sync-item">
+              <input type="checkbox" checked disabled>
+              <span>设置下次复诊提醒（5月25日）</span>
+            </label>
+            <label class="cs-sync-item">
+              <input type="checkbox" checked disabled>
+              <span>保存医嘱到问诊记录</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="cs-actions">
+          <button class="btn-primary-lg" onclick="syncAndOrder()">同步并立即购药</button>
+          <button class="btn-secondary-lg" onclick="syncConsultDataOnly()">仅同步，稍后购药</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 购药下单弹窗 -->
+    <div class="modal-overlay" id="orderModal" onclick="if(event.target===this)this.classList.remove('show')">
+      <div class="modal-content modal-lg">
+        <div class="modal-close" onclick="document.getElementById('orderModal').classList.remove('show')">&times;</div>
+        <h3>处方购药</h3>
+
+        <!-- 处方来源 -->
+        <div class="order-source" id="orderSource">
+          <span class="order-source-icon">&#128203;</span>
+          <span>来源：李建华医生 · 图文问诊处方</span>
+        </div>
+
+        <!-- 药品清单 -->
+        <div class="order-drug-list" id="orderDrugList">
+          <div class="order-drug-item">
+            <div class="order-drug-check">&#10003;</div>
+            <div class="order-drug-info">
+              <div class="order-drug-name">氨氯地平片 5mg</div>
+              <div class="order-drug-spec">络活喜 · 30片/盒</div>
+            </div>
+            <div class="order-drug-qty">
+              <span class="order-qty-label">x1盒</span>
+              <div class="order-drug-price">&yen;32.50</div>
+            </div>
+          </div>
+          <div class="order-drug-item">
+            <div class="order-drug-check">&#10003;</div>
+            <div class="order-drug-info">
+              <div class="order-drug-name">阿司匹林肠溶片 100mg</div>
+              <div class="order-drug-spec">拜阿司匹灵 · 30片/盒</div>
+            </div>
+            <div class="order-drug-qty">
+              <span class="order-qty-label">x1盒</span>
+              <div class="order-drug-price">&yen;18.90</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 配送方式 -->
+        <div class="order-section">
+          <div class="order-section-title">配送方式</div>
+          <div class="order-delivery-opts">
+            <div class="order-delivery-opt selected" onclick="pickDelivery(this)">
+              <div class="od-icon">&#9889;</div>
+              <div class="od-info">
+                <div class="od-name">美团快送</div>
+                <div class="od-desc">预计 30 分钟送达</div>
+              </div>
+              <div class="od-price">免运费</div>
+            </div>
+            <div class="order-delivery-opt" onclick="pickDelivery(this)">
+              <div class="od-icon">&#128230;</div>
+              <div class="od-info">
+                <div class="od-name">标准配送</div>
+                <div class="od-desc">预计明天上午送达</div>
+              </div>
+              <div class="od-price">免运费</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 配送地址 -->
+        <div class="order-section">
+          <div class="order-section-title">配送地址</div>
+          <div class="order-address">
+            <div class="oa-name">张建国 <span class="oa-phone">138****6789</span></div>
+            <div class="oa-detail">北京市朝阳区建国路88号 2号楼 1502室</div>
+          </div>
+        </div>
+
+        <!-- 库存同步提示 -->
+        <div class="order-sync-tip">
+          <span class="order-sync-icon">&#128260;</span>
+          <span>下单后药品将自动计入库存，系统重新计算续方提醒时间</span>
+        </div>
+
+        <!-- 底部结算 -->
+        <div class="order-bottom">
+          <div class="order-total">
+            <span class="order-total-label">合计</span>
+            <span class="order-total-price">&yen;51.40</span>
+          </div>
+          <button class="order-submit-btn" onclick="submitOrder()">提交订单</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
