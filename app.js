@@ -242,7 +242,7 @@ const tabMap = {
 };
 
 function switchTab(tabId) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#tab-bar-main .tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(tabId).classList.add('active');
   document.getElementById(tabMap[tabId]).classList.add('active');
@@ -634,7 +634,7 @@ function showThinkingThenReply(steps, reply) {
   var area = document.getElementById('chatMessages');
   var thinkDiv = document.createElement('div');
   thinkDiv.className = 'chat-msg ai';
-  thinkDiv.innerHTML = '<div class="chat-msg-avatar">AI</div>' +
+  thinkDiv.innerHTML = '<div class="chat-msg-avatar">&#129432;</div>' +
     '<div class="ai-thinking" id="thinkBubble"></div>';
   area.appendChild(thinkDiv);
   scrollChat();
@@ -881,7 +881,7 @@ function addAgentReply(reply) {
   var area = document.getElementById('chatMessages');
   var div = document.createElement('div');
   div.className = 'chat-msg ai';
-  var html = '<div class="chat-msg-avatar">AI</div><div class="chat-msg-bubble">';
+  var html = '<div class="chat-msg-avatar">&#129432;</div><div class="chat-msg-bubble">';
   html += reply.text;
   if (reply.actionCard) {
     html += reply.actionCard;
@@ -1580,4 +1580,81 @@ function setFontSize(btn, className) {
     }, 100);
   }
 })();
+
+// ====== 家属协同管理模式 ======
+
+// 家属模式页面映射
+var familyTabMap = {
+  'fm-tab-home': 'page-fm-home',
+  'fm-tab-records': 'page-fm-records',
+  'fm-tab-stock': 'page-fm-stock',
+  'fm-tab-notify': 'page-fm-notify',
+  'fm-tab-settings': 'page-fm-settings'
+};
+
+function enterFamilyMode() {
+  // 隐藏所有患者页面和导航
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('#tab-bar-main .tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('tab-bar-main').style.display = 'none';
+  document.getElementById('familyTabBar').style.display = '';
+  // 重置家属tab状态
+  document.querySelectorAll('#familyTabBar .tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('fm-tab-home').classList.add('active');
+  // 显示家属首页
+  document.getElementById('page-fm-home').classList.add('active');
+  // 构建家属日期选择器
+  buildFamilyDatePicker();
+}
+
+function exitFamilyMode() {
+  // 隐藏家属页面和导航
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('#familyTabBar .tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('familyTabBar').style.display = 'none';
+  document.getElementById('tab-bar-main').style.display = '';
+  // 回到个人中心
+  switchTab('tab-profile');
+}
+
+function switchFamilyTab(tabId) {
+  // 切换家属模式的tab
+  document.querySelectorAll('#familyTabBar .tab').forEach(function(t) { t.classList.remove('active'); });
+  Object.values(familyTabMap).forEach(function(id) { document.getElementById(id).classList.remove('active'); });
+  document.getElementById(tabId).classList.add('active');
+  document.getElementById(familyTabMap[tabId]).classList.add('active');
+  document.getElementById(familyTabMap[tabId]).scrollTop = 0;
+}
+
+// 家属模式日期选择器
+function buildFamilyDatePicker() {
+  var picker = document.getElementById('fmDatePicker');
+  if (!picker) return;
+  var today = new Date();
+  var weekNames = ['周日','周一','周二','周三','周四','周五','周六'];
+  var html = '';
+  for (var i = -7; i <= 7; i++) {
+    var d = new Date(today);
+    d.setDate(today.getDate() + i);
+    var day = d.getDate();
+    var month = d.getMonth() + 1;
+    var label = '';
+    if (i === -1) label = '昨天';
+    else if (i === 0) label = '今天';
+    else if (i === 1) label = '明天';
+    else label = weekNames[d.getDay()];
+    var activeClass = (i === 0) ? ' active' : '';
+    html += '<div class="date-item' + activeClass + '" data-offset="' + i + '" data-month="' + month + '">' +
+      '<div class="d-week">' + label + '</div>' +
+      '<div class="d-day">' + day + '</div>' +
+    '</div>';
+  }
+  picker.innerHTML = html;
+  setTimeout(function() {
+    var active = picker.querySelector('.date-item.active');
+    if (active) {
+      picker.scrollLeft = active.offsetLeft - picker.offsetWidth / 2 + active.offsetWidth / 2;
+    }
+  }, 50);
+}
 

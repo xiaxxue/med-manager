@@ -27,7 +27,7 @@
           </div>
           <div class="top-bar-ai">
             <div class="ai-suggest-card" onclick="switchTab('tab-ai')">
-              <div class="ai-avatar">AI</div>
+              <div class="ai-avatar">&#129432;</div>
               <div class="ai-text">
                 <p>&#127793; 本周服药率 <strong>92%</strong>，比上周提升 3%，继续保持！</p>
                 <p>&#127777; 今日气温骤降至 12°C，高血压患者注意保暖，建议推迟晨练</p>
@@ -78,7 +78,7 @@
               <div class="alert-title">昨日晚间漏服 1 次</div>
               <div class="alert-desc">二甲双胍 0.5g 未确认服用</div>
             </div>
-            <button class="alert-action" onclick="switchTab('tab-ai')">问问AI</button>
+            <button class="alert-action" onclick="switchTab('tab-ai')">问小团</button>
           </div>
         </section>
 
@@ -676,13 +676,13 @@
     <!-- ===== AI 智能体客服页 ===== -->
     <div class="page page-chat" id="page-ai">
       <header class="page-header">
-        <h2>AI 用药助手</h2>
+        <h2>小团用药助手</h2>
         <div class="ai-disclaimer">仅供参考，异常请及时复诊</div>
       </header>
       <div class="chat-scroll" id="chatScroll">
         <div class="content chat-content">
           <div class="chat-welcome">
-            <div class="chat-ai-avatar">AI</div>
+            <div class="chat-ai-avatar">&#129432;</div>
             <div class="chat-welcome-text" id="welcomeText">
               张叔叔好！上次您提到血压偏高，最近有好转吗？氨氯地平还剩6天用量，需要我帮您续方吗？
             </div>
@@ -783,6 +783,8 @@
               </div>
             </div>
           </div>
+
+          <button class="fm-enter-btn" onclick="enterFamilyMode()">&#128065; 进入协同管理（查看爸爸的用药情况）</button>
 
           <!-- 家属通知设置 -->
           <div class="notify-settings">
@@ -893,24 +895,510 @@
         <!-- 其��� -->
         <div class="panel-section">
           <div class="panel-section-title">&#9881; 其他</div>
-          <div class="notify-row">
-            <div><div class="notify-title">我的问诊记录</div></div>
-            <span class="notify-arrow">&rsaquo;</span>
-          </div>
           <div class="notify-row" onclick="openMedData()" style="cursor:pointer">
             <div><div class="notify-title">用药数据</div></div>
-            <span class="notify-arrow">&rsaquo;</span>
-          </div>
-          <div class="notify-row">
-            <div><div class="notify-title">关于慢病用药小管家</div></div>
             <span class="notify-arrow">&rsaquo;</span>
           </div>
         </div>
       </main>
     </div>
 
+    <!-- ===== 家属协同管理 - 监护首页 ===== -->
+    <div class="page" id="page-fm-home">
+      <header class="fm-top-bar">
+        <div class="fm-top-info">
+          <div class="fm-avatar">张</div>
+          <div>
+            <div class="fm-top-name">爸爸 · 张建国</div>
+            <div class="fm-top-sub">高血压 · 2型糖尿病 · 用药第 86 天</div>
+          </div>
+        </div>
+      </header>
+      <main class="content">
+        <!-- 今日服药状态 -->
+        <section class="section-block" style="margin-top:16px">
+          <div class="section-header"><h3>今日服药状态</h3></div>
+          <div class="fm-dose-dots">
+            <span class="fm-dot done">&#9679;</span>
+            <span class="fm-dot done">&#9679;</span>
+            <span class="fm-dot done">&#9679;</span>
+            <span class="fm-dot pending">&#9675;</span>
+            <span class="fm-dot pending">&#9675;</span>
+            <span class="fm-dose-text">已完成 3/5</span>
+          </div>
+        </section>
+
+        <!-- 异常提醒 -->
+        <section class="risk-alerts" style="margin-top:16px">
+          <div class="alert-card risk-red">
+            <div class="alert-icon">&#9673;</div>
+            <div class="alert-body">
+              <div class="alert-title">昨日晚间漏服 1 次</div>
+              <div class="alert-desc">二甲双胍 0.5g 未确认服用</div>
+            </div>
+            <button class="alert-action" onclick="showToast('已发送提醒给爸爸')">提醒爸爸</button>
+          </div>
+          <div class="alert-card risk-orange">
+            <div class="alert-icon">&#9888;</div>
+            <div class="alert-body">
+              <div class="alert-title">氨氯地平库存紧张</div>
+              <div class="alert-desc">剩余 12 片，预计 6 天后用完</div>
+            </div>
+            <button class="alert-action" onclick="showToast('正在帮爸爸续方')">帮续方</button>
+          </div>
+        </section>
+
+        <!-- 今日时间轴（只读） -->
+        <section class="section-block">
+          <div class="section-header"><h3>今日用药时间轴</h3></div>
+          <div class="fm-timeline">
+            <div class="fm-tl-item done">
+              <div class="fm-tl-period"><span>&#9728;</span> 晨起 · 07:00</div>
+              <div class="fm-tl-status">&#10003; 07:12 已服用</div>
+            </div>
+            <div class="fm-tl-item done">
+              <div class="fm-tl-period"><span>&#127860;</span> 早餐后 · 08:00</div>
+              <div class="fm-tl-status">&#10003; 08:23 已服用</div>
+            </div>
+            <div class="fm-tl-item pending">
+              <div class="fm-tl-period"><span>&#9728;</span> 午餐后 · 14:30</div>
+              <div class="fm-tl-status waiting">等待中</div>
+            </div>
+            <div class="fm-tl-item pending">
+              <div class="fm-tl-period"><span>&#127769;</span> 晚间 · 21:00</div>
+              <div class="fm-tl-status waiting">等待中</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 快捷操作 -->
+        <section class="section-block">
+          <div class="section-header"><h3>快捷操作</h3></div>
+          <div class="fm-quick-grid">
+            <button class="fm-quick-btn" onclick="showToast('已向爸爸发送服药提醒')">
+              <span class="fm-quick-icon">&#128276;</span>
+              <span>提醒吃药</span>
+            </button>
+            <button class="fm-quick-btn" onclick="showToast('正在帮爸爸续方购药')">
+              <span class="fm-quick-icon">&#128203;</span>
+              <span>帮续方</span>
+            </button>
+            <button class="fm-quick-btn" onclick="showToast('正在帮爸爸预约医生')">
+              <span class="fm-quick-icon">&#128105;&#8205;&#9877;</span>
+              <span>帮约医生</span>
+            </button>
+            <button class="fm-quick-btn" onclick="showToast('正在拨打电话给爸爸')">
+              <span class="fm-quick-icon">&#128222;</span>
+              <span>打电话</span>
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ===== 家属协同管理 - 用药记录 ===== -->
+    <div class="page" id="page-fm-records">
+      <header class="page-header">
+        <h2>用药记录</h2>
+      </header>
+      <main class="content">
+        <!-- 日期选择器 -->
+        <div class="date-month-label" id="fmDateMonthLabel">4月</div>
+        <div class="date-picker" id="fmDatePicker"></div>
+
+        <!-- 当日服药进度条 -->
+        <div class="med-progress">
+          <div class="prog-bar">
+            <div class="prog-fill" style="width:60%"></div>
+          </div>
+          <div class="prog-text">已完成 3/5 次服药</div>
+        </div>
+
+        <!-- 只读详细时间轴 -->
+        <section class="section-block">
+          <div class="section-header"><h3>服药详情</h3></div>
+          <div class="fm-timeline-detail">
+            <div class="fm-td-section">
+              <div class="fm-td-period"><span>&#9728;</span> 晨起 · 07:00</div>
+              <div class="fm-td-item done">
+                <div class="fm-td-drug">氨氯地平片</div>
+                <div class="fm-td-dose">5mg x 1片</div>
+                <div class="fm-td-status-done">&#10003; 07:12</div>
+              </div>
+              <div class="fm-td-item done">
+                <div class="fm-td-drug">阿司匹林肠溶片</div>
+                <div class="fm-td-dose">100mg x 1片</div>
+                <div class="fm-td-status-done">&#10003; 07:12</div>
+              </div>
+            </div>
+            <div class="fm-td-section">
+              <div class="fm-td-period"><span>&#127860;</span> 早餐后 · 08:00</div>
+              <div class="fm-td-item done">
+                <div class="fm-td-drug">盐酸二甲双胍片</div>
+                <div class="fm-td-dose">0.5g x 1片</div>
+                <div class="fm-td-status-done">&#10003; 08:23</div>
+              </div>
+            </div>
+            <div class="fm-td-section">
+              <div class="fm-td-period"><span>&#9728;</span> 午餐后 · 14:30</div>
+              <div class="fm-td-item pending">
+                <div class="fm-td-drug">盐酸二甲双胍片</div>
+                <div class="fm-td-dose">0.5g x 1片</div>
+                <div class="fm-td-status-wait">待服用</div>
+              </div>
+            </div>
+            <div class="fm-td-section">
+              <div class="fm-td-period"><span>&#127769;</span> 晚间 · 21:00</div>
+              <div class="fm-td-item pending">
+                <div class="fm-td-drug">盐酸二甲双胍片</div>
+                <div class="fm-td-dose">0.5g x 1片</div>
+                <div class="fm-td-status-wait">待服用</div>
+              </div>
+              <div class="fm-td-item pending">
+                <div class="fm-td-drug">阿托伐他汀钙片</div>
+                <div class="fm-td-dose">20mg x 1片</div>
+                <div class="fm-td-status-wait">待服用</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 本周统计 -->
+        <section class="section-block">
+          <div class="fm-week-stat">
+            <div class="fm-week-title">本周统计</div>
+            <div class="fm-week-grid">
+              <div class="fm-week-item">
+                <div class="fm-week-num" style="color:var(--primary)">92%</div>
+                <div class="fm-week-label">服药率</div>
+              </div>
+              <div class="fm-week-item">
+                <div class="fm-week-num" style="color:var(--danger)">2</div>
+                <div class="fm-week-label">漏服次数</div>
+              </div>
+              <div class="fm-week-item">
+                <div class="fm-week-num" style="color:var(--accent)">3</div>
+                <div class="fm-week-label">延迟次数</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ===== 家属协同管理 - 库存 ===== -->
+    <div class="page" id="page-fm-stock">
+      <header class="page-header">
+        <h2>爸爸的药品库存</h2>
+      </header>
+      <main class="content">
+        <div class="box-overview">
+          <div class="bo-item">
+            <div class="bo-num">4</div>
+            <div class="bo-label">正在吃的药</div>
+          </div>
+          <div class="bo-item">
+            <div class="bo-num warn-text">1</div>
+            <div class="bo-label">快吃完了</div>
+          </div>
+          <div class="bo-item">
+            <div class="bo-num">28</div>
+            <div class="bo-label">一周用药量/片</div>
+          </div>
+        </div>
+
+        <div class="box-list">
+          <div class="box-card urgent">
+            <div class="box-header-row">
+              <div class="box-drug-name">氨氯地平片</div>
+              <span class="box-tag tag-urgent">快吃完了</span>
+            </div>
+            <div class="box-spec">5mg/片 · 络活喜</div>
+            <div class="box-meter">
+              <div class="meter-bar">
+                <div class="meter-fill urgent-fill" style="width:20%"></div>
+              </div>
+              <div class="meter-text">剩余 12 片</div>
+            </div>
+            <div class="box-info-row">
+              <div class="box-info">
+                <span class="box-info-label">日均用量</span>
+                <span>1片/天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">可服天数</span>
+                <span class="warn-text">6天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">预计用完</span>
+                <span class="warn-text">5月1日</span>
+              </div>
+            </div>
+            <div class="box-btn-row">
+              <button class="box-action-btn" onclick="showToast('正在帮爸爸续方购药')">帮爸爸续方购药</button>
+            </div>
+          </div>
+
+          <div class="box-card normal">
+            <div class="box-header-row">
+              <div class="box-drug-name">盐酸二甲双胍片</div>
+              <span class="box-tag tag-ok">药量充足</span>
+            </div>
+            <div class="box-spec">0.5g/片</div>
+            <div class="box-meter">
+              <div class="meter-bar">
+                <div class="meter-fill ok-fill" style="width:65%"></div>
+              </div>
+              <div class="meter-text">剩余 58 片</div>
+            </div>
+            <div class="box-info-row">
+              <div class="box-info">
+                <span class="box-info-label">日均用量</span>
+                <span>3片/天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">可服天数</span>
+                <span>19天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">预计用完</span>
+                <span>5月14日</span>
+              </div>
+            </div>
+            <button class="box-edit-btn full-w" onclick="showToast('帮爸爸修正数量功能开发中')">帮爸爸修正数量</button>
+          </div>
+
+          <div class="box-card normal">
+            <div class="box-header-row">
+              <div class="box-drug-name">阿司匹林肠溶片</div>
+              <span class="box-tag tag-ok">药量充足</span>
+            </div>
+            <div class="box-spec">100mg/片 · 拜阿司匹灵</div>
+            <div class="box-meter">
+              <div class="meter-bar">
+                <div class="meter-fill ok-fill" style="width:80%"></div>
+              </div>
+              <div class="meter-text">剩余 45 片</div>
+            </div>
+            <div class="box-info-row">
+              <div class="box-info">
+                <span class="box-info-label">日均用量</span>
+                <span>1片/天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">可服天数</span>
+                <span>45天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">预计用完</span>
+                <span>6月9日</span>
+              </div>
+            </div>
+            <button class="box-edit-btn full-w" onclick="showToast('帮爸爸修正数量功能开发中')">帮爸爸修正数量</button>
+          </div>
+
+          <div class="box-card normal">
+            <div class="box-header-row">
+              <div class="box-drug-name">阿托伐他汀钙片</div>
+              <span class="box-tag tag-ok">药量充足</span>
+            </div>
+            <div class="box-spec">20mg/片 · 立普妥</div>
+            <div class="box-meter">
+              <div class="meter-bar">
+                <div class="meter-fill ok-fill" style="width:55%"></div>
+              </div>
+              <div class="meter-text">剩余 22 片</div>
+            </div>
+            <div class="box-info-row">
+              <div class="box-info">
+                <span class="box-info-label">日均用量</span>
+                <span>1片/天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">可服天数</span>
+                <span>22天</span>
+              </div>
+              <div class="box-info">
+                <span class="box-info-label">预计用完</span>
+                <span>5月17日</span>
+              </div>
+            </div>
+            <button class="box-edit-btn full-w" onclick="showToast('帮爸爸修正数量功能开发中')">帮爸爸修正数量</button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ===== 家属协同管理 - 提醒设置 ===== -->
+    <div class="page" id="page-fm-notify">
+      <header class="page-header">
+        <h2>提醒设置</h2>
+      </header>
+      <main class="content">
+        <div class="panel-section" style="margin-top:16px">
+          <div class="panel-section-title">&#128276; 通知我</div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">漏服即时通知</div>
+              <div class="notify-desc">爸爸每次漏服都通知我</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">库存预警通知</div>
+              <div class="notify-desc">库存低于7天时通知我</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">每日服药日报</div>
+              <div class="notify-desc">每晚推送爸爸今日服药情况</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">复诊提醒同步</div>
+              <div class="notify-desc">爸爸快到复诊日时通知我</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-section-title">&#128276; 提醒爸爸</div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">到时间自动提醒爸爸</div>
+              <div class="notify-desc">服药时间到时自动发送提醒</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">漏服后再次提醒</div>
+              <div class="notify-desc">漏服30分钟后自动再次提醒</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">提醒方式</div>
+              <div class="notify-desc">选择提醒爸爸的方式</div>
+            </div>
+          </div>
+          <div class="fm-remind-methods">
+            <label class="fm-method-opt">
+              <input type="checkbox" checked> 电话
+            </label>
+            <label class="fm-method-opt">
+              <input type="checkbox" checked> 短信
+            </label>
+            <label class="fm-method-opt">
+              <input type="checkbox" checked> 应用通知
+            </label>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ===== 家属协同管理 - 设置 ===== -->
+    <div class="page" id="page-fm-settings">
+      <header class="page-header">
+        <h2>协同管理设置</h2>
+      </header>
+      <main class="content">
+        <!-- 管理对象信息卡 -->
+        <div class="fm-person-card" style="margin-top:16px">
+          <div class="fm-person-avatar">张</div>
+          <div class="fm-person-info">
+            <div class="fm-person-name">爸爸 · 张建国</div>
+            <div class="fm-person-tags">
+              <span class="p-tag">高血压</span>
+              <span class="p-tag">2型糖尿病</span>
+              <span class="p-tag">高血脂</span>
+            </div>
+            <div class="fm-person-bind">绑定时间：2026.01.15</div>
+          </div>
+        </div>
+
+        <!-- 权限管理 -->
+        <div class="panel-section">
+          <div class="panel-section-title">&#128274; 权限管理</div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">查看用药记录</div>
+              <div class="notify-desc">查看爸爸的服药打卡和库存信息</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">代为续方购药</div>
+              <div class="notify-desc">帮爸爸续方和购买药品</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-row">
+            <div>
+              <div class="notify-title">代为预约问诊</div>
+              <div class="notify-desc">帮爸爸预约医生问诊</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 其他绑定家人 -->
+        <div class="panel-section">
+          <div class="panel-section-title">&#128106; 管理对象</div>
+          <div class="family-list">
+            <div class="family-card" style="border:2px solid var(--primary)">
+              <div class="family-avatar">张</div>
+              <div class="family-info">
+                <div class="family-name">张建国 <span class="family-role">爸爸</span></div>
+                <div class="family-phone">当前管理</div>
+              </div>
+              <div class="family-status bound">管理中</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 退出协同管理按钮 -->
+        <button class="fm-exit-btn" onclick="exitFamilyMode()">退出协同管理</button>
+      </main>
+    </div>
+
     <!-- ===== 底部导航 ===== -->
-    <nav class="tab-bar" role="tablist" aria-label="主导航">
+    <nav class="tab-bar" id="tab-bar-main" role="tablist" aria-label="主导航">
       <div class="tab active" id="tab-home" onclick="switchTab('tab-home')">
         <div class="tab-icon">&#127968;</div>
         <div class="tab-label">首页</div>
@@ -924,12 +1412,36 @@
         <div class="tab-label">看医生</div>
       </div>
       <div class="tab" id="tab-ai" onclick="switchTab('tab-ai')">
-        <div class="tab-icon">&#129302;</div>
-        <div class="tab-label">AI助手</div>
+        <div class="tab-icon">&#129432;</div>
+        <div class="tab-label">小团</div>
       </div>
       <div class="tab" id="tab-profile" onclick="switchTab('tab-profile')">
         <div class="tab-icon">&#128100;</div>
         <div class="tab-label">个人中心</div>
+      </div>
+    </nav>
+
+    <!-- ===== 家属模式底部导航 ===== -->
+    <nav class="tab-bar family-tab-bar" id="familyTabBar" style="display:none">
+      <div class="tab active" id="fm-tab-home" onclick="switchFamilyTab('fm-tab-home')">
+        <div class="tab-icon">&#128065;</div>
+        <div class="tab-label">监护首页</div>
+      </div>
+      <div class="tab" id="fm-tab-records" onclick="switchFamilyTab('fm-tab-records')">
+        <div class="tab-icon">&#128203;</div>
+        <div class="tab-label">用药记录</div>
+      </div>
+      <div class="tab" id="fm-tab-stock" onclick="switchFamilyTab('fm-tab-stock')">
+        <div class="tab-icon">&#128230;</div>
+        <div class="tab-label">库存</div>
+      </div>
+      <div class="tab" id="fm-tab-notify" onclick="switchFamilyTab('fm-tab-notify')">
+        <div class="tab-icon">&#128276;</div>
+        <div class="tab-label">提醒</div>
+      </div>
+      <div class="tab" id="fm-tab-settings" onclick="switchFamilyTab('fm-tab-settings')">
+        <div class="tab-icon">&#9881;</div>
+        <div class="tab-label">设置</div>
       </div>
     </nav>
 
