@@ -2454,6 +2454,54 @@ input { font-family: inherit; font-size: inherit; }
 }
 .order-submit-btn:active { transform: scale(.95); }
 
+/* 购药下单弹窗新增样式 */
+.order-stepper {
+  display: flex; align-items: center; gap: 0;
+  border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+}
+.order-stepper .stepper-btn {
+  width: 30px; height: 28px; background: var(--bg);
+  border: none; font-size: 16px; font-weight: 600;
+  color: var(--text); cursor: pointer; display: flex;
+  align-items: center; justify-content: center; transition: background .15s;
+}
+.order-stepper .stepper-btn:active { background: var(--border); }
+.order-stepper .stepper-val {
+  width: 32px; text-align: center; font-size: 14px;
+  font-weight: 600; border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border); line-height: 28px;
+}
+.order-add-drug-btn {
+  width: 100%; padding: 10px; background: none;
+  border: 1.5px dashed var(--border); border-radius: 10px;
+  color: var(--primary); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all .2s; margin-top: 8px;
+}
+.order-add-drug-btn:active { background: var(--primary-light); }
+.order-fee-detail {
+  background: var(--bg); border-radius: 10px; padding: 12px;
+}
+.order-fee-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0; font-size: 14px; color: var(--text-sec);
+}
+.order-fee-row.order-fee-total {
+  border-top: 1px solid var(--border); margin-top: 6px; padding-top: 10px;
+  font-weight: 700; color: var(--text); font-size: 16px;
+}
+.order-fee-free { color: var(--primary); }
+.od-radio {
+  font-size: 18px; color: var(--primary); flex-shrink: 0;
+  width: 22px; text-align: center;
+}
+.order-submit-green {
+  width: 100%; padding: 14px; background: var(--primary); color: #fff;
+  border-radius: 12px; font-size: calc(16px * var(--font-scale)); font-weight: 600;
+  transition: transform .15s;
+}
+.order-submit-green:active { transform: scale(.97); }
+.order-bottom { flex-direction: column; }
+
 /* ====== 适老化新增样式 ====== */
 
 /* 紧急求助按钮 */
@@ -2711,6 +2759,17 @@ input { font-family: inherit; font-size: inherit; }
 .fm-tl-status.waiting {
   color: var(--text-third);
 }
+.fm-remind-btn {
+  margin-left: 8px;
+  padding: 3px 10px;
+  font-size: 12px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 500;
+  transition: transform .15s;
+}
+.fm-remind-btn:active { transform: scale(.9); }
 
 /* 快捷操作网格 */
 .fm-quick-grid {
@@ -2876,4 +2935,94 @@ input { font-family: inherit; font-size: inherit; }
   font-size: calc(13px * var(--font-scale));
   color: var(--text-third);
   margin-top: 6px;
+}
+
+/* ====== 启动角色选择页 ====== */
+#page-launch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, var(--primary) 0%, #0abf7f 40%, var(--bg) 40%);
+  padding: 0 24px;
+  bottom: 0;
+}
+
+.launch-logo-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 36px;
+}
+
+.launch-logo-circle {
+  width: 80px;
+  height: 80px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  margin-bottom: 16px;
+}
+
+.launch-app-name {
+  font-size: calc(24px * var(--font-scale));
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.launch-slogan {
+  font-size: calc(14px * var(--font-scale));
+  color: rgba(255,255,255,0.85);
+  margin-top: 6px;
+}
+
+.launch-cards {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.launch-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-align: center;
+}
+
+.launch-card:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.launch-card-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.launch-card-title {
+  font-size: calc(20px * var(--font-scale));
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.launch-card-desc {
+  font-size: calc(14px * var(--font-scale));
+  color: var(--text-third);
+  line-height: 1.5;
+}
+
+.launch-footer {
+  margin-top: 28px;
+  font-size: calc(12px * var(--font-scale));
+  color: var(--text-third);
 }

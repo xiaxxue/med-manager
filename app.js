@@ -1090,9 +1090,11 @@ function advanceRenewStep4() {
 
 function openRenewOrder() {
   // 更新下单弹窗的来源信息
+  document.getElementById('orderSource').style.display = 'block';
   document.getElementById('orderSource').innerHTML =
     '<span class="order-source-icon">&#128203;</span>' +
     '<span>来源：一键续方 · 李建华医生审核通过</span>';
+  document.getElementById('orderModalTitle').textContent = '处方购药';
   document.getElementById('orderModal').classList.add('show');
 }
 
@@ -1271,18 +1273,39 @@ function confirmBooking() {
 
   document.getElementById('bookingModal').classList.remove('show');
 
-  // 显示待问诊卡片
-  const pv = document.getElementById('pendingVisit');
-  document.getElementById('pvDoctorName').textContent = doctorName + ' · 心内科';
-  document.getElementById('pvTime').textContent = typeText + ' · ' + dateText + ' ' + timeText;
-  document.getElementById('pvAvatar').textContent = doctorName.charAt(0);
+  // 显示待问诊卡片（患者版）
+  var pv = document.getElementById('pendingVisit');
+  if (pv) {
+    document.getElementById('pvDoctorName').textContent = doctorName + ' · 心内科';
+    document.getElementById('pvTime').textContent = typeText + ' · ' + dateText + ' ' + timeText;
+    document.getElementById('pvAvatar').textContent = doctorName.charAt(0);
+    pv.style.display = 'block';
+    pv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  // 显示待问诊卡片（家属版）
+  var fmPv = document.getElementById('fmPendingVisit');
+  if (fmPv) {
+    var fmDocName = document.getElementById('fmPvDoctorName');
+    var fmTime = document.getElementById('fmPvTime');
+    var fmAvatar = document.getElementById('fmPvAvatar');
+    if (fmDocName) fmDocName.textContent = doctorName + ' · 心内科';
+    if (fmTime) fmTime.textContent = typeText + ' · ' + dateText + ' ' + timeText;
+    if (fmAvatar) fmAvatar.textContent = doctorName.charAt(0);
+    fmPv.style.display = 'block';
+    fmPv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
   // 保存到问诊界面
-  document.getElementById('consultDoctorName').textContent = doctorName + ' · 心内科';
-  document.getElementById('consultType').textContent = typeText;
-  pv.style.display = 'block';
-  pv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  var consultDoc = document.getElementById('consultDoctorName');
+  var consultType = document.getElementById('consultType');
+  if (consultDoc) consultDoc.textContent = doctorName + ' · 心内科';
+  if (consultType) consultType.textContent = typeText;
 
   showToast('预约成功，可点击「进入问诊」开始');
+
+  // 如果在家属模式下，自动跳到问诊页
+  if (document.getElementById('familyTabBar').style.display !== 'none') {
+    switchFamilyTab('fm-tab-visit');
+  }
 }
 
 // ====== 问诊界面 ======
@@ -1351,6 +1374,11 @@ function syncAndOrder() {
   showToast('医嘱已同步到用药计划');
   // 打开购药下单弹窗
   setTimeout(() => {
+    document.getElementById('orderSource').style.display = 'block';
+    document.getElementById('orderSource').innerHTML =
+      '<span class="order-source-icon">&#128203;</span>' +
+      '<span>来源：李建华医生 · 图文问诊处方</span>';
+    document.getElementById('orderModalTitle').textContent = '处方购药';
     document.getElementById('orderModal').classList.add('show');
   }, 500);
 }
@@ -1362,19 +1390,93 @@ function syncConsultDataOnly() {
 }
 
 // 购药下单
-function pickDelivery(el) {
-  document.querySelectorAll('.order-delivery-opt').forEach(o => o.classList.remove('selected'));
+var orderDrugPrices = { orderDrug1: 28.00 };
+var orderDrugQtys = { orderDrug1: 1 };
+var orderDrugCount = 1;
+var currentDelivery = 'express';
+
+function openOrderModal() {
+  // 重置为库存页购药模式
+  document.getElementById('orderSource').style.display = 'none';
+  document.getElementById('orderModalTitle').textContent = '购药下单';
+  // 重置数量
+  orderDrugQtys = { orderDrug1: 1 };
+  orderDrugPrices = { orderDrug1: 28.00 };
+  var qtyEl = document.getElementById('orderDrug1Qty');
+  if (qtyEl) qtyEl.textContent = '1';
+  var priceEl = document.getElementById('orderDrug1Price');
+  if (priceEl) priceEl.innerHTML = '&yen;28.00';
+  updateOrderTotal();
+  document.getElementById('orderModal').classList.add('show');
+}
+
+function changeOrderQty(drugId, delta) {
+  var qty = (orderDrugQtys[drugId] || 1) + delta;
+  if (qty < 1) qty = 1;
+  if (qty > 10) qty = 10;
+  orderDrugQtys[drugId] = qty;
+  document.getElementById(drugId + 'Qty').textContent = qty;
+  var unitPrice = orderDrugPrices[drugId] || 28.00;
+  document.getElementById(drugId + 'Price').innerHTML = '&yen;' + (unitPrice * qty).toFixed(2);
+  updateOrderTotal();
+}
+
+function updateOrderTotal() {
+  var total = 0;
+  for (var key in orderDrugQtys) {
+    total += (orderDrugPrices[key] || 0) * (orderDrugQtys[key] || 1);
+  }
+  document.getElementById('orderDrugTotal').innerHTML = '&yen;' + total.toFixed(2);
+  document.getElementById('orderPayTotal').innerHTML = '&yen;' + total.toFixed(2);
+  document.getElementById('orderSubmitBtn').innerHTML = '确认下单 &yen;' + total.toFixed(2);
+}
+
+function addOrderDrug() {
+  orderDrugCount++;
+  var drugId = 'orderDrugExtra' + orderDrugCount;
+  var extraDrugs = [
+    { name: '阿司匹林肠溶片 100mg × 30片（1盒）', spec: '拜阿司匹灵', price: 18.90 },
+    { name: '盐酸二甲双胍片 0.5g × 60片（1盒）', spec: '格华止', price: 35.00 },
+    { name: '阿托伐他汀钙片 20mg × 28片（1盒）', spec: '立普妥', price: 68.00 }
+  ];
+  var drug = extraDrugs[(orderDrugCount - 2) % extraDrugs.length];
+  orderDrugPrices[drugId] = drug.price;
+  orderDrugQtys[drugId] = 1;
+
+  var item = document.createElement('div');
+  item.className = 'order-drug-item';
+  item.id = drugId;
+  item.innerHTML =
+    '<div class="order-drug-info">' +
+      '<div class="order-drug-name">' + drug.name + '</div>' +
+      '<div class="order-drug-spec">' + drug.spec + '</div>' +
+    '</div>' +
+    '<div class="order-drug-qty">' +
+      '<div class="order-stepper">' +
+        '<button class="stepper-btn" onclick="changeOrderQty(\'' + drugId + '\', -1)">−</button>' +
+        '<span class="stepper-val" id="' + drugId + 'Qty">1</span>' +
+        '<button class="stepper-btn" onclick="changeOrderQty(\'' + drugId + '\', 1)">+</button>' +
+      '</div>' +
+      '<div class="order-drug-price" id="' + drugId + 'Price">&yen;' + drug.price.toFixed(2) + '</div>' +
+    '</div>';
+  document.getElementById('orderDrugList').appendChild(item);
+  updateOrderTotal();
+}
+
+function pickDelivery(el, type) {
+  document.querySelectorAll('.order-delivery-opt').forEach(function(o) {
+    o.classList.remove('selected');
+    o.querySelector('.od-radio').innerHTML = '&#9675;';
+  });
   el.classList.add('selected');
+  el.querySelector('.od-radio').innerHTML = '&#9679;';
+  currentDelivery = type || 'express';
 }
 
 function submitOrder() {
   document.getElementById('orderModal').classList.remove('show');
-  showToast('订单已提交，预计 30 分钟送达');
-  // 跳到库存页看更新后的库存
-  setTimeout(() => {
-    switchTab('tab-box');
-    showToast('药品到货后库存将自动更新');
-  }, 1800);
+  var msg = currentDelivery === 'express' ? '订单已提交，预计30分钟送达' : '订单已提交，预计明日送达';
+  showToast(msg);
 }
 
 // ====== 提前提醒时间选择 ======
@@ -1581,14 +1683,46 @@ function setFontSize(btn, className) {
   }
 })();
 
+// ====== 启动页角色选择 ======
+
+function selectRole(role) {
+  // 隐藏启动页
+  document.getElementById('page-launch').classList.remove('active');
+
+  if (role === 'patient') {
+    // 显示患者导航和首页
+    document.getElementById('tab-bar-main').style.display = '';
+    document.getElementById('familyTabBar').style.display = 'none';
+    switchTab('tab-home');
+  } else {
+    // 显示家属导航和监护首页
+    document.getElementById('tab-bar-main').style.display = 'none';
+    document.getElementById('familyTabBar').style.display = '';
+    // 重置家属tab
+    document.querySelectorAll('#familyTabBar .tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('fm-tab-home').classList.add('active');
+    document.getElementById('page-fm-home').classList.add('active');
+    if (typeof buildFamilyDatePicker === 'function') buildFamilyDatePicker();
+  }
+}
+
+function backToRoleSelect() {
+  // 隐藏所有页面和导航
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-bar-main').style.display = 'none';
+  document.getElementById('familyTabBar').style.display = 'none';
+  // 显示启动页
+  document.getElementById('page-launch').classList.add('active');
+}
+
 // ====== 家属协同管理模式 ======
 
 // 家属模式页面映射
 var familyTabMap = {
   'fm-tab-home': 'page-fm-home',
-  'fm-tab-records': 'page-fm-records',
   'fm-tab-stock': 'page-fm-stock',
-  'fm-tab-notify': 'page-fm-notify',
+  'fm-tab-visit': 'page-fm-visit',
+  'fm-tab-ai': 'page-fm-ai',
   'fm-tab-settings': 'page-fm-settings'
 };
 
@@ -1656,5 +1790,236 @@ function buildFamilyDatePicker() {
       picker.scrollLeft = active.offsetLeft - picker.offsetWidth / 2 + active.offsetWidth / 2;
     }
   }, 50);
+}
+
+// ====== 家属版 AI 智能体 ======
+
+// 家属版能力分组快捷问题
+var fmSkillQuestions = {
+  fmStatus: ['爸爸今天药都吃了吗？', '爸爸昨天有没有漏服？', '提醒爸爸吃药'],
+  fmStock: ['爸爸哪些药快吃完了？', '药还够吃几天？'],
+  fmRenew: ['帮爸爸续方', '帮爸爸买药'],
+  fmBooking: ['帮爸爸约李医生', '上次医生说了什么？'],
+  fmReport: ['爸爸这周服药情况', '查看服药报告']
+};
+
+function switchFmSkill(btn) {
+  document.querySelectorAll('#page-fm-ai .skill-tag').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  var skill = btn.getAttribute('data-skill');
+  renderFmQuickQ(skill);
+}
+
+function renderFmQuickQ(skill) {
+  var container = document.getElementById('fmQuickQ');
+  var qs = fmSkillQuestions[skill] || [];
+  var html = '';
+  qs.forEach(function(q) {
+    html += '<button class="qq-btn" onclick="fmAskQuick(this)">' + q + '</button>';
+  });
+  container.innerHTML = html;
+  container.style.display = '';
+}
+
+// 初始化显示第一组
+setTimeout(function() { renderFmQuickQ('fmStatus'); }, 100);
+
+// +菜单
+function toggleFmPlusMenu() {
+  document.getElementById('fmPlusMenuOverlay').classList.toggle('show');
+}
+function closeFmPlusMenu() {
+  document.getElementById('fmPlusMenuOverlay').classList.remove('show');
+}
+function fmPlusAction(skill) {
+  closeFmPlusMenu();
+  var firstQ = fmSkillQuestions[skill] ? fmSkillQuestions[skill][0] : '';
+  if (firstQ) { fmAddUserMsg(firstQ); fmAgentReply(firstQ); }
+}
+
+// 意图识别
+function fmDetectIntent(input) {
+  if (/今天.*吃|吃了吗|服药.*情况/.test(input)) return 'todayStatus';
+  if (/漏服|没吃|忘/.test(input)) return 'missed';
+  if (/提醒.*吃药/.test(input)) return 'remind';
+  if (/快吃完|库存|还剩|够吃|药量/.test(input)) return 'stock';
+  if (/续方|续/.test(input)) return 'renew';
+  if (/买药|购药/.test(input)) return 'buy';
+  if (/约.*医生|预约|挂号/.test(input)) return 'booking';
+  if (/上次.*医生|医嘱|问诊记录/.test(input)) return 'doctorNotes';
+  if (/这周|服药率|报告|数据/.test(input)) return 'report';
+  return 'unknown';
+}
+
+// Agent 回复数据
+var fmAgentReplies = {
+  todayStatus: {
+    thinking: ['查询爸爸今日打卡记录...', '统计服药进度...', '完成'],
+    text: '爸爸今天的服药情况：已完成 <strong>3/5</strong> 次。',
+    actionCard: '<div class="ai-action-card">' +
+      '<div class="ac-row"><span>&#10003; 07:12</span><span>氨氯地平 + 阿司匹林</span></div>' +
+      '<div class="ac-row"><span>&#10003; 08:23</span><span>二甲双胍</span></div>' +
+      '<div class="ac-row"><span>&#10003; 14:35</span><span>二甲双胍</span></div>' +
+      '<div class="ac-row" style="color:var(--text-third)"><span>&#9675; 21:00</span><span>二甲双胍 + 阿托伐他汀</span></div>' +
+      '<button class="ac-btn" onclick="showToast(\'已提醒爸爸吃晚上的药\')">提醒爸爸吃药</button></div>'
+  },
+  missed: {
+    thinking: ['查询漏服记录...', '完成'],
+    text: '爸爸昨日有 <strong>1 次</strong>漏服：',
+    actionCard: '<div class="ai-action-card">' +
+      '<div class="ac-row" style="color:var(--danger)"><span>&#9888; 4/24 21:00</span><span>二甲双胍 0.5g</span></div>' +
+      '<button class="ac-btn" onclick="showToast(\'已提醒爸爸注意按时吃药\')">提醒爸爸注意</button></div>'
+  },
+  remind: {
+    thinking: ['发送提醒...', '完成'],
+    text: '已向爸爸发送服药提醒！',
+    actionCard: '<div class="ai-action-card"><div class="ac-row"><span>&#128276;</span><span>提醒已发送到爸爸的手机</span></div></div>'
+  },
+  stock: {
+    thinking: ['查询爸爸的药品库存...', '计算剩余天数...', '完成'],
+    text: '爸爸目前的药量情况：',
+    actionCard: '<div class="ai-action-card">' +
+      '<div class="ac-row" style="color:var(--danger)"><span>&#9888; 氨氯地平</span><span>12片 · <strong>6天</strong></span></div>' +
+      '<div class="ac-row"><span>&#10003; 二甲双胍</span><span>58片 · 19天</span></div>' +
+      '<div class="ac-row"><span>&#10003; 阿司匹林</span><span>45片 · 45天</span></div>' +
+      '<div class="ac-row"><span>&#10003; 阿托伐他汀</span><span>22片 · 22天</span></div>' +
+      '<button class="ac-btn" onclick="switchFamilyTab(\'fm-tab-stock\')">帮爸爸续方</button></div>',
+    warn: '氨氯地平库存紧张，建议本周帮爸爸续方。'
+  },
+  renew: {
+    thinking: ['查询库存...', '检查续方条件...', '检查服药记录...', '分析完成'],
+    text: '帮您检查了爸爸的续方条件：',
+    actionCard: '<div class="ai-action-card">' +
+      '<div class="ac-row"><span class="ac-status-ok">&#10003;</span><span>近7日服药记录完整</span></div>' +
+      '<div class="ac-row"><span class="ac-status-ok">&#10003;</span><span>历史处方可复用</span></div>' +
+      '<div class="ac-row"><span class="ac-status-warn">&#9888;</span><span>缺少近期血压记录</span></div>' +
+      '<div class="ac-row"><span class="ac-status-ok">&#10003;</span><span>无连续漏服</span></div>' +
+      '<button class="ac-btn" onclick="switchFamilyTab(\'fm-tab-visit\')">帮爸爸问诊续方</button></div>'
+  },
+  buy: {
+    thinking: ['查询需补货药品...', '完成'],
+    text: '爸爸需要补货的药品：',
+    actionCard: '<div class="ai-action-card">' +
+      '<div class="ac-row" style="color:var(--danger)"><span>氨氯地平 5mg</span><span>仅剩6天</span></div>' +
+      '<button class="ac-btn" onclick="switchFamilyTab(\'fm-tab-stock\')">帮爸爸购药</button></div>'
+  },
+  booking: {
+    thinking: ['查询医生排班...', '完成'],
+    text: '李建华医生（心内科·主任医师）明天可约时段：',
+    actionCard: '<div class="ai-action-card">' +
+      '<div class="ac-row"><button class="ac-btn-sm" onclick="openBooking(\'video\')">09:00</button> <button class="ac-btn-sm" onclick="openBooking(\'video\')">10:00</button> <button class="ac-btn-sm" onclick="openBooking(\'video\')">14:00</button> <button class="ac-btn-sm" onclick="openBooking(\'video\')">15:00</button></div>' +
+      '<div style="font-size:12px;color:var(--text-sec);margin-top:8px">点击时段帮爸爸预约</div></div>'
+  },
+  doctorNotes: {
+    thinking: ['查询问诊记录...', '完成'],
+    text: '爸爸最近一次问诊记录：',
+    actionCard: '<div class="ai-action-card">' +
+      '<div class="ac-row"><span>日期</span><span>2026.03.28</span></div>' +
+      '<div class="ac-row"><span>医生</span><span>李建华 · 心内科</span></div>' +
+      '<div class="ac-row"><span>方式</span><span>视频问诊</span></div>' +
+      '<div style="padding:8px 0;font-size:13px;color:var(--text);border-top:1px solid var(--border);margin-top:4px">医嘱：血压控制尚可，继续当前方案，注意低盐饮食</div>' +
+      '<button class="ac-btn" onclick="switchFamilyTab(\'fm-tab-visit\')">查看完整记录</button></div>'
+  },
+  report: {
+    thinking: ['统计服药数据...', '生成报告...', '完成'],
+    text: '爸爸本周服药报告：',
+    actionCard: '<div class="ai-action-card">' +
+      '<div class="ac-row"><span>服药率</span><span style="color:var(--primary);font-weight:700">92%</span></div>' +
+      '<div class="ac-row"><span>漏服</span><span style="color:var(--danger);font-weight:700">2次</span></div>' +
+      '<div class="ac-row"><span>延迟</span><span style="color:var(--accent);font-weight:700">3次</span></div>' +
+      '<div style="font-size:12px;color:var(--text-sec);padding-top:8px">比上周提升 3%，整体不错</div>' +
+      '<button class="ac-btn" onclick="openMedData()">查看详细报告</button></div>'
+  },
+  unknown: {
+    thinking: ['分析问题...'],
+    text: '关于爸爸的用药，我可以帮您：',
+    actionCard: '<div class="ai-action-card">' +
+      '<button class="ac-btn" onclick="fmPlusAction(\'fmStatus\')" style="margin-bottom:6px">查看服药状态</button>' +
+      '<button class="ac-btn" onclick="fmPlusAction(\'fmStock\')" style="margin-bottom:6px">查看药量</button>' +
+      '<button class="ac-btn" onclick="fmPlusAction(\'fmRenew\')" style="margin-bottom:6px">帮爸爸续方</button>' +
+      '<button class="ac-btn" onclick="fmPlusAction(\'fmBooking\')" style="margin-bottom:6px">帮爸爸约医生</button>' +
+      '<button class="ac-btn" onclick="fmPlusAction(\'fmReport\')">查看数据报告</button></div>'
+  }
+};
+
+// 家属版思考过程 + 回复
+function fmAgentReply(input) {
+  document.getElementById('fmQuickQ').style.display = 'none';
+  var intent = fmDetectIntent(input);
+  var data = fmAgentReplies[intent] || fmAgentReplies.unknown;
+  fmShowThinking(data.thinking, function() {
+    fmAddAgentMsg(data);
+  });
+}
+
+function fmShowThinking(steps, callback) {
+  var area = document.getElementById('fmChatMessages');
+  var div = document.createElement('div');
+  div.className = 'chat-msg ai';
+  div.innerHTML = '<div class="chat-msg-avatar">&#129432;</div><div class="ai-thinking" id="fmThinkBubble"></div>';
+  area.appendChild(div);
+  fmScrollBottom();
+  var bubble = document.getElementById('fmThinkBubble');
+  var i = 0;
+  function next() {
+    if (i < steps.length) {
+      var step = document.createElement('div');
+      step.className = 'think-step';
+      step.innerHTML = '<span class="think-icon">&#9881;</span> ' + steps[i];
+      bubble.appendChild(step);
+      fmScrollBottom();
+      i++;
+      setTimeout(next, 500);
+    } else {
+      setTimeout(function() {
+        div.remove();
+        callback();
+      }, 800);
+    }
+  }
+  next();
+}
+
+function fmAddAgentMsg(data) {
+  var area = document.getElementById('fmChatMessages');
+  var div = document.createElement('div');
+  div.className = 'chat-msg ai';
+  var html = '<div class="chat-msg-avatar">&#129432;</div><div class="chat-msg-bubble">';
+  html += data.text;
+  if (data.actionCard) html += data.actionCard;
+  if (data.warn) html += '<div class="ai-warn">' + data.warn + '</div>';
+  html += '</div>';
+  div.innerHTML = html;
+  area.appendChild(div);
+  fmScrollBottom();
+}
+
+function fmAskQuick(btn) {
+  var q = btn.textContent;
+  fmAddUserMsg(q);
+  fmAgentReply(q);
+}
+
+function fmSendChat() {
+  var input = document.getElementById('fmChatInput');
+  var text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  fmAddUserMsg(text);
+  fmAgentReply(text);
+}
+
+function fmAddUserMsg(text) {
+  var area = document.getElementById('fmChatMessages');
+  var div = document.createElement('div');
+  div.className = 'chat-msg user';
+  div.innerHTML = '<div class="chat-msg-avatar">小</div><div class="chat-msg-bubble">' + escapeHtml(text) + '</div>';
+  area.appendChild(div);
+  fmScrollBottom();
+}
+
+function fmScrollBottom() {
+  var scroll = document.getElementById('fmChatScroll');
+  setTimeout(function() { scroll.scrollTop = scroll.scrollHeight; }, 50);
 }
 
