@@ -46,14 +46,13 @@
 ## 文件结构
 
 ```
-美团笔试/
+med-manager/
 ├── README.md                    ← 本文件
 ├── PRD.md                       ← 产品需求文档
 ├── AI用药智能体架构设计.md        ← AI Agent 架构设计
-└── prototype/
-    ├── index.html               ← 页面结构（单文件，所有页面）
-    ├── style.css                ← 样式
-    └── app.js                   ← 交互逻辑
+├── index.html                   ← 页面结构（单文件，所有页面）
+├── style.css                    ← 样式
+└── app.js                       ← 交互逻辑
 ```
 
 ## 技术说明
